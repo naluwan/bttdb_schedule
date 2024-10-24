@@ -7,7 +7,6 @@ const initialState = {
   user: null,
   isLoading: false,
   currentTab: 'detail',
-  isImport: false,
 };
 
 const useStore = create<State>((set) => {

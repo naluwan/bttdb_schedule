@@ -9,7 +9,6 @@ export type State = {
   user: null | UserType;
   isLoading: boolean;
   currentTab: string;
-  isImport: boolean;
   setUser: (user: UserType) => void;
   setIsLoading: (isLoading: boolean) => void;
   setCurrentTab: (tab: string) => void;

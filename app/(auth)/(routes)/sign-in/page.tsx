@@ -44,7 +44,7 @@ const SignInPage = () => {
         setUser(res.data.user);
         // 設置token
         Cookies.set('BTTDB_JWT_TOKEN', res.data.token);
-        router.push('/');
+        router.push('/schedule');
       }
       setAccountInfo({ email: '', password: '' });
       setIsLoading(false);
@@ -58,8 +58,9 @@ const SignInPage = () => {
         <div className='w-full'>
           <div className='text-center'>
             <h1 className='text-2xl font-semibold text-gray-900 md:text-3xl'>
-              Back To The Day Before - 排班系統登入
+              Back To The Day Before
             </h1>
+            <h1 className='text-2xl font-semibold text-gray-900 md:text-3xl'>排班系統</h1>
             <p className='mt-2 text-gray-500'>請輸入Email和密碼</p>
           </div>
           <div className='mt-5'>
@@ -72,7 +73,6 @@ const SignInPage = () => {
                   value={accountInfo.email}
                   placeholder='Email Address'
                   className='signin-register-input peer'
-                  // autoComplete='false'
                   onChange={(e) => atChangeInput(e)}
                 />
                 <label

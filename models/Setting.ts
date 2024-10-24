@@ -1,7 +1,7 @@
 // models/Settings.js
 import mongoose from 'mongoose';
 
-const SettingsSchema = new mongoose.Schema({
+const SettingSchema = new mongoose.Schema({
   weekdayMin: {
     type: Number,
     required: true,
@@ -12,4 +12,4 @@ const SettingsSchema = new mongoose.Schema({
   },
 });
 
-export default mongoose.models.Settings || mongoose.model('Settings', SettingsSchema);
+export default mongoose.models.Setting || mongoose.model('Setting', SettingSchema);

@@ -1,28 +1,23 @@
 'use client';
-import { NotepadText, Users, BriefcaseBusiness, Blocks } from 'lucide-react';
+import { BriefcaseBusiness, House, CalendarCheck } from 'lucide-react';
 import React from 'react';
 import SidebarItem from './sidebar-item';
 import useStore from '@/store';
 
 const normalRoutes = [
   {
-    icon: Blocks,
-    label: '庫存系統',
-    href: '/stock',
+    icon: House,
+    label: '首頁',
+    href: '/schedule',
   },
   {
-    icon: Users,
-    label: '會員資訊',
-    href: '/member',
+    icon: CalendarCheck,
+    label: '排班',
+    href: '/personalSchedule',
   },
 ];
 
 const adminRoutes = [
-  {
-    icon: NotepadText,
-    label: '訂單系統',
-    href: '/order',
-  },
   {
     icon: BriefcaseBusiness,
     label: '員工資訊',

@@ -9,6 +9,7 @@ import { usePathname } from 'next/navigation';
 const useAuth = () => {
   const router = useRouter();
   const pathName = usePathname();
+
   const { setUser } = useStore((state) => ({
     setUser: state.setUser,
   }));
@@ -38,8 +39,6 @@ const useAuth = () => {
           Cookies.remove('BTTDB_JWT_TOKEN');
           router.push('/sign-in');
         });
-    } else {
-      router.push('/sign-in');
     }
   }, [setUser, router, pathName]);
 };

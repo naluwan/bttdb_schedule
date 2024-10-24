@@ -2,6 +2,7 @@ import './globals.css';
 import type { Metadata } from 'next';
 import { Inter } from 'next/font/google';
 import { ToastProvider } from '@/components/providers/toaster-provider';
+import ProtectedProvider from '@/components/providers/protected-provider';
 
 const inter = Inter({ subsets: ['latin'] });
 
@@ -12,12 +13,14 @@ export const metadata: Metadata = {
 
 const RootLayout = ({ children }: { children: React.ReactNode }) => {
   return (
-    <html lang='zh-tw' className='hide-scrollbar'>
-      <body className={inter.className}>
-        <ToastProvider />
-        {children}
-      </body>
-    </html>
+    <ProtectedProvider>
+      <html lang='zh-tw' className='hide-scrollbar'>
+        <body className={inter.className}>
+          <ToastProvider />
+          {children}
+        </body>
+      </html>
+    </ProtectedProvider>
   );
 };
 
