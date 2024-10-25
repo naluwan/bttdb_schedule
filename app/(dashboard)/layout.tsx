@@ -5,9 +5,17 @@ import Sidebar from './_components/sidebar';
 import { useRouter } from 'next/navigation';
 import { useEffect } from 'react';
 import Cookies from 'js-cookie';
+import useStore from '@/store';
+import useSWR from 'swr';
 
 const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
   useAuth();
+  const { setIsOpenSchedule, user } = useStore((state) => {
+    return {
+      setIsOpenSchedule: state.setIsOpenSchedule,
+      user: state.user,
+    };
+  });
   const router = useRouter();
   // 獲取token
   const token = Cookies.get('BTTDB_JWT_TOKEN');
@@ -17,6 +25,42 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
       router.push('/sign-in');
     }
   }, [token, router]);
+
+  // 定義一個 function 來調用 API
+  const getSettingData = async () => {
+    if (!token && !user) {
+      router.push('/sign-in'); // 如果 token 不存在，回到登入頁面
+      return;
+    }
+
+    const response = await fetch('/api/setting', {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    if (!response.ok) {
+      if (response.status === 401) {
+        // Token 驗證失敗，回到登入頁面
+        router.push('/sign-in');
+        return;
+      }
+
+      throw new Error('An error occurred while fetching the data.');
+    }
+
+    return response.json();
+  };
+
+  const { data: settingData } = useSWR(['/api/setting', token], getSettingData);
+
+  useEffect(() => {
+    if (settingData && settingData.status === 200) {
+      setIsOpenSchedule(settingData.data.isOpenSchedule);
+    } else if (settingData) {
+      router.push('/sign-in');
+    }
+  }, [settingData, setIsOpenSchedule, router]);
 
   return (
     <div className='h-full'>

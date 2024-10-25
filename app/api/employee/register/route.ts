@@ -3,7 +3,7 @@ import connect from '@/lib/mongodb';
 import Employee from '@/models/Employee';
 import bcrypt from 'bcryptjs';
 import { authenticateToken, checkAdminAndAdministrative } from '@/lib/authMiddleware';
-import EmergencyContact from '@/models/EmergencyContact';
+// import EmergencyContact from '@/models/EmergencyContact';
 
 connect();
 
@@ -34,33 +34,9 @@ export async function POST(req: Request): Promise<NextResponse> {
     }
 
     // 獲取並處理請求
-    const {
-      name,
-      email,
-      birthday,
-      phone,
-      address,
-      role,
-      dateEmployed,
-      id,
-      emergencyName,
-      emergencyRelationship,
-      emergencyPhone,
-    } = await req.json();
+    const { name, email, phone, role, dateEmployed, id } = await req.json();
 
-    if (
-      !name ||
-      !email ||
-      !birthday ||
-      !phone ||
-      !address ||
-      !role ||
-      !dateEmployed ||
-      !id ||
-      !emergencyName ||
-      !emergencyRelationship ||
-      !emergencyPhone
-    ) {
+    if (!name || !email || !phone || !role || !dateEmployed || !id) {
       return NextResponse.json({ status: 400, message: '所有欄位都是必填的' });
     }
 
@@ -70,31 +46,28 @@ export async function POST(req: Request): Promise<NextResponse> {
       return NextResponse.json({ status: 400, message: '信箱已存在' });
     }
 
-    const defaultPassword = 'chuquan1234';
+    const defaultPassword = 'BTTDB1234';
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(defaultPassword, salt);
 
     // 建立緊急聯絡人
-    const emergencyData = new EmergencyContact({
-      name: emergencyName,
-      relationship: emergencyRelationship,
-      phone: emergencyPhone,
-    });
+    // const emergencyData = new EmergencyContact({
+    //   name: emergencyName,
+    //   relationship: emergencyRelationship,
+    //   phone: emergencyPhone,
+    // });
 
-    await emergencyData.save();
+    // await emergencyData.save();
 
     // 建立新員工
     const newEmployee = new Employee({
       name,
       email,
       password: hashedPassword,
-      birthday,
       phone,
-      address,
       role,
       id,
       dateEmployed,
-      emergencyContact: emergencyData._id,
       updatedBy: user._id,
     });
 

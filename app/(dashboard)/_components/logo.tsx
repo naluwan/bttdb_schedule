@@ -7,7 +7,7 @@ const logo = () => {
       width={130}
       alt='logo'
       className='h-auto w-auto'
-      src='/dashboard.png'
+      src='/schedule.png'
       priority
     />
   );

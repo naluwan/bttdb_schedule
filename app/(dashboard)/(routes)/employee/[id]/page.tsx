@@ -372,12 +372,14 @@ const EmployeeDetailPage = () => {
                   <span
                     className={cn('ml-2 break-words text-gray-900', isEdit && 'hidden')}
                   >
-                    {new Date(employeeData?.birthday as Date).toLocaleDateString()}
+                    {employeeData?.birthday
+                      ? new Date(employeeData?.birthday as Date).toLocaleDateString()
+                      : ''}
                   </span>
                   <DatePicker
                     openDatePicker={openBirthday}
                     setOpenDatePicker={setOpenBirthday}
-                    defaultDate={updateEmployee.birthday}
+                    defaultDate={updateEmployee.birthday || new Date()}
                     isEdit={isEdit}
                     updateDate={updateBirthday}
                     yearsRange={years}
@@ -443,7 +445,7 @@ const EmployeeDetailPage = () => {
                     職位:
                   </Label>
                   <span className={cn('ml-2 text-gray-900', isEdit && 'hidden')}>
-                    {employeeData?.role === 'admin' ? '管理員' : '元公'}
+                    {employeeData?.role === 'admin' ? '管理員' : '員工'}
                   </span>
                   <RadioGroup
                     className={cn('hidden', isEdit && user?.role === 'admin' && 'flex')}
@@ -463,22 +465,12 @@ const EmployeeDetailPage = () => {
                     </div>
                     <div className='flex items-center space-x-2'>
                       <RadioGroupItem
-                        value='administrative'
+                        value='employee'
                         id='option-two'
                         className='text-xl md:text-2xl'
                       />
                       <Label htmlFor='option-two' className='text-xl md:text-2xl'>
-                        行政
-                      </Label>
-                    </div>
-                    <div className='flex items-center space-x-2'>
-                      <RadioGroupItem
-                        value='technician'
-                        id='option-three'
-                        className='text-xl md:text-2xl'
-                      />
-                      <Label htmlFor='option-three' className='text-xl md:text-2xl'>
-                        技師
+                        員工
                       </Label>
                     </div>
                   </RadioGroup>

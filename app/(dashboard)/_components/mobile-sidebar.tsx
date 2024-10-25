@@ -1,4 +1,4 @@
-import { NotepadText, Users, BriefcaseBusiness, Blocks, Menu } from 'lucide-react';
+import { BriefcaseBusiness, Menu, House, CalendarCheck } from 'lucide-react';
 import {
   Sheet,
   SheetClose,
@@ -12,28 +12,23 @@ import useStore from '@/store';
 import { cn } from '@/lib/utils';
 import Link from 'next/link';
 import Image from 'next/image';
-import sheetLogo from '@/public/dashboard.png';
+import sheetLogo from '@/public/schedule.png';
 import * as VisuallyHidden from '@radix-ui/react-visually-hidden';
 
 const normalRoutes = [
   {
-    icon: Blocks,
-    label: '庫存系統',
-    href: '/stock',
+    icon: House,
+    label: '首頁',
+    href: '/schedule',
   },
   {
-    icon: Users,
-    label: '會員資訊',
-    href: '/member',
+    icon: CalendarCheck,
+    label: '排班',
+    href: '/personalSchedule',
   },
 ];
 
 const adminRoutes = [
-  {
-    icon: NotepadText,
-    label: '訂單系統',
-    href: '/order',
-  },
   {
     icon: BriefcaseBusiness,
     label: '員工資訊',

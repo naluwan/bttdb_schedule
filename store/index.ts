@@ -7,6 +7,7 @@ const initialState = {
   user: null,
   isLoading: false,
   currentTab: 'detail',
+  isOpenSchedule: false,
 };
 
 const useStore = create<State>((set) => {
@@ -21,6 +22,9 @@ const useStore = create<State>((set) => {
     },
     setCurrentTab(tab: string) {
       set({ currentTab: tab });
+    },
+    setIsOpenSchedule(isOpenSchedule: boolean) {
+      set({ isOpenSchedule });
     },
     onLogout() {
       set({ user: null });

@@ -4,11 +4,12 @@ import mongoose from 'mongoose';
 const SettingSchema = new mongoose.Schema({
   weekdayMin: {
     type: Number,
-    required: true,
   },
   weekendMin: {
     type: Number,
-    required: true,
+  },
+  isOpenSchedule: {
+    type: Boolean,
   },
 });
 

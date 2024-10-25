@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import connect from '@/lib/mongodb';
-import { authenticateToken, checkSuperAdmin } from '@/lib/authMiddleware';
+import { authenticateToken, checkAdmin } from '@/lib/authMiddleware';
 import Setting from '@/models/Setting';
 
 connect();
@@ -22,7 +22,7 @@ export async function PATCH(req: Request): Promise<NextResponse> {
     }
 
     try {
-      checkSuperAdmin(user);
+      checkAdmin(user);
     } catch (err) {
       if (err instanceof Error && err.message === '權限不足') {
         return NextResponse.json({
@@ -43,8 +43,8 @@ export async function PATCH(req: Request): Promise<NextResponse> {
       });
     }
 
-    // 更新import的值
-    setting.import = !setting.import;
+    // 更新isOpenSchedule的值
+    setting.isOpenSchedule = !setting.isOpenSchedule;
     await setting.save();
 
     return NextResponse.json({
@@ -54,9 +54,9 @@ export async function PATCH(req: Request): Promise<NextResponse> {
     });
   } catch (error) {
     if (error instanceof Error) {
-      console.error('[SETTING IMPORT]', error.message);
+      console.error('[SETTING OPEN SCHEDULE]', error.message);
     } else {
-      console.error('[SETTING IMPORT] Unknown error:', error);
+      console.error('[SETTING OPEN SCHEDULE] Unknown error:', error);
     }
     return new NextResponse('內部發生錯誤', { status: 500 });
   }

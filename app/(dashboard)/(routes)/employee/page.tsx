@@ -22,7 +22,7 @@ import { Input } from '@/components/ui/input';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import axios from 'axios';
 import toast from 'react-hot-toast';
-import { Textarea } from '@/components/ui/textarea';
+// import { Textarea } from '@/components/ui/textarea';
 import { useRouter, useSearchParams } from 'next/navigation';
 import {
   Select,
@@ -39,13 +39,8 @@ interface NewEmployeeType {
   id: string;
   email: string;
   phone: string;
-  birthday: Date;
-  address: string;
   dateEmployed: Date;
   role: string;
-  emergencyName: string;
-  emergencyRelationship: string;
-  emergencyPhone: string;
 }
 
 const EmployeePage = () => {
@@ -62,7 +57,7 @@ const EmployeePage = () => {
   const page = searchParams.get('page');
   const [currentPage, setCurrentPage] = useState('0');
   const [dateOpen, setDateOpen] = useState(false);
-  const [dateOpenBirthday, setDateOpenBirthday] = useState(false);
+  // const [dateOpenBirthday, setDateOpenBirthday] = useState(false);
 
   useEffect(() => {
     if (page) {
@@ -76,13 +71,8 @@ const EmployeePage = () => {
     id: '',
     email: '',
     phone: '',
-    birthday: new Date(),
-    address: '',
     dateEmployed: new Date(),
     role: '',
-    emergencyName: '',
-    emergencyRelationship: '',
-    emergencyPhone: '',
   });
 
   // 獲取token
@@ -169,13 +159,8 @@ const EmployeePage = () => {
           id: '',
           email: '',
           phone: '',
-          birthday: new Date(),
-          address: '',
           dateEmployed: new Date(),
           role: '',
-          emergencyName: '',
-          emergencyRelationship: '',
-          emergencyPhone: '',
         });
         mutate();
         toast.success(result.message);
@@ -203,15 +188,7 @@ const EmployeePage = () => {
     return data?.data; // filter === 'all'
   }, [filter, data]);
 
-  const updateBirthday = useCallback((e: Date | undefined) => {
-    setNewEmployee((prev) => {
-      return {
-        ...prev,
-        birthday: e ? e : prev.birthday,
-      };
-    });
-  }, []);
-
+  // 更新到職日期
   const updateDateEmployed = useCallback((e: Date | undefined) => {
     setNewEmployee((prev) => {
       return {
@@ -220,9 +197,6 @@ const EmployeePage = () => {
       };
     });
   }, []);
-
-  const currentYear = new Date().getFullYear();
-  const years = Array.from({ length: 80 }, (_, i) => currentYear - i);
 
   return (
     <div className='p-6'>
@@ -263,6 +237,7 @@ const EmployeePage = () => {
                   <div className='grid grid-cols-1 gap-4 md:grid-cols-2'>
                     <div className='overflow-hidden rounded-lg border'>
                       <div className='relative flex flex-col justify-between gap-y-2 p-4'>
+                        {/* 員工姓名 */}
                         <div>
                           <Label htmlFor='name'>
                             員工姓名 <span className='text-red-500'>*</span>
@@ -275,6 +250,8 @@ const EmployeePage = () => {
                             defaultValue={newEmployee.name}
                           />
                         </div>
+
+                        {/* 身分證號碼 */}
                         <div>
                           <Label htmlFor='name'>
                             身分證號碼 <span className='text-red-500'>*</span>
@@ -287,6 +264,8 @@ const EmployeePage = () => {
                             defaultValue={newEmployee.id}
                           />
                         </div>
+
+                        {/* Email */}
                         <div>
                           <Label htmlFor='email'>
                             Email <span className='text-red-500'>*</span>
@@ -300,19 +279,8 @@ const EmployeePage = () => {
                             defaultValue={newEmployee.email}
                           />
                         </div>
-                        <div>
-                          <Label htmlFor='phone'>
-                            電話 <span className='text-red-500'>*</span>
-                          </Label>
-                          <Input
-                            name='phone'
-                            id='phone'
-                            required
-                            onChange={(e) => updateNewEmployee(e)}
-                            defaultValue={newEmployee.phone}
-                          />
-                        </div>
-                        <div>
+                        {/* 緊急聯絡人 */}
+                        {/* <div>
                           <Label htmlFor='emergencyName'>
                             緊急聯絡人 <span className='text-red-500'>*</span>
                           </Label>
@@ -348,12 +316,13 @@ const EmployeePage = () => {
                               />
                             </div>
                           </div>
-                        </div>
+                        </div> */}
                       </div>
                     </div>
                     <div className='flex flex-col gap-y-4 rounded-lg border p-4'>
                       <div className='flex flex-col gap-y-3'>
-                        <div>
+                        {/* 生日 */}
+                        {/* <div>
                           <Label htmlFor='birthday'>
                             生日 <span className='text-red-500'>*</span>
                           </Label>
@@ -367,7 +336,23 @@ const EmployeePage = () => {
                               yearsRange={years}
                             />
                           </div>
+                        </div> */}
+
+                        {/* 電話 */}
+                        <div>
+                          <Label htmlFor='phone'>
+                            電話 <span className='text-red-500'>*</span>
+                          </Label>
+                          <Input
+                            name='phone'
+                            id='phone'
+                            required
+                            onChange={(e) => updateNewEmployee(e)}
+                            defaultValue={newEmployee.phone}
+                          />
                         </div>
+
+                        {/* 到職日期 */}
                         <div>
                           <Label htmlFor='dateEmployed'>
                             到職日期 <span className='text-red-500'>*</span>
@@ -382,7 +367,9 @@ const EmployeePage = () => {
                             />
                           </div>
                         </div>
-                        <div>
+
+                        {/* 地址 */}
+                        {/* <div>
                           <Label htmlFor='address'>
                             地址 <span className='text-red-500'>*</span>
                           </Label>
@@ -396,8 +383,9 @@ const EmployeePage = () => {
                               className='resize-none'
                             />
                           </div>
-                        </div>
+                        </div> */}
 
+                        {/* 權限 */}
                         <div>
                           <Label htmlFor='role'>
                             權限 <span className='text-red-500'>*</span>
@@ -413,12 +401,8 @@ const EmployeePage = () => {
                               <Label htmlFor='option-one'>管理員</Label>
                             </div>
                             <div className='flex items-center space-x-2'>
-                              <RadioGroupItem value='administrative' id='option-two' />
-                              <Label htmlFor='option-two'>行政</Label>
-                            </div>
-                            <div className='flex items-center space-x-2'>
-                              <RadioGroupItem value='technician' id='option-three' />
-                              <Label htmlFor='option-three'>技師</Label>
+                              <RadioGroupItem value='employee' id='option-two' />
+                              <Label htmlFor='option-two'>員工</Label>
                             </div>
                           </RadioGroup>
                         </div>
@@ -438,13 +422,8 @@ const EmployeePage = () => {
                         id: '',
                         email: '',
                         phone: '',
-                        birthday: new Date(),
-                        address: '',
                         dateEmployed: new Date(),
                         role: '',
-                        emergencyName: '',
-                        emergencyRelationship: '',
-                        emergencyPhone: '',
                       })
                     }
                   >

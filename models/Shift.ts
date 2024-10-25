@@ -2,17 +2,22 @@
 import mongoose from 'mongoose';
 
 const ShiftSchema = new mongoose.Schema({
-  date: {
+  startDate: {
+    type: Date,
+    required: true,
+  },
+  endDate: {
     type: Date,
     required: true,
   },
   isAvailable: {
     type: Boolean,
     required: true,
+    default: true,
   },
-  user: {
+  employee: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: 'User',
+    ref: 'Employee',
     required: true,
   },
 });
