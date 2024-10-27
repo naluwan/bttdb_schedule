@@ -51,7 +51,7 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
       if (err instanceof Error) {
         if (err.message === '權限不足') {
           // 如果不是管理員，只能修改自己的密碼
-          if (user.id !== userId) {
+          if (String(user._id) !== userId) {
             return NextResponse.json({
               status: 403,
               message: '權限不足',

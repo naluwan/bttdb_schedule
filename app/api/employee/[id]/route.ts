@@ -33,7 +33,6 @@ export async function GET(
       employeeData = await Employee.findOne({
         _id: id,
       })
-        .select('-password')
         .populate('updatedBy', 'name')
         .exec();
     } else {
@@ -41,7 +40,6 @@ export async function GET(
         _id: id,
         name: { $ne: 'ADMIN' },
       })
-        .select('-password')
         .populate('updatedBy', 'name')
         .exec();
     }
@@ -93,6 +91,16 @@ export async function PATCH(req: Request): Promise<NextResponse> {
       emergencyRelationship,
       dateEmployed,
     } = await req.json();
+
+    console.log('name', name);
+    console.log('birthday', birthday);
+    console.log('address', address);
+    console.log('phone', phone);
+    console.log('emergencyName ', emergencyName);
+    console.log('emergencyPhone', emergencyPhone);
+    console.log('emergencyRelationship', emergencyRelationship);
+    console.log('role', role);
+    console.log('dateEmployed', dateEmployed);
 
     if (
       !name ||
@@ -154,12 +162,33 @@ export async function PATCH(req: Request): Promise<NextResponse> {
       if (err instanceof Error) {
         if (err.message === '權限不足') {
           // 如果不是管理員或行政，只能修改自己的資料
-          if (user.id !== _id) {
+          console.log('user.id', user._id);
+          console.log('_id', _id);
+          if (String(user._id) !== _id) {
             return NextResponse.json({
               status: 403,
               message: '權限不足',
             });
           }
+
+          let emergencyContact;
+          emergencyContact = await EmergencyContact.findById(
+            emergencyId === '' ? null : emergencyId,
+          );
+
+          if (!emergencyContact) {
+            emergencyContact = new EmergencyContact({
+              name: emergencyName,
+              phone: emergencyPhone,
+              relationship: emergencyRelationship,
+            });
+          } else {
+            emergencyContact.name = emergencyName;
+            emergencyContact.phone = emergencyPhone;
+            emergencyContact.relationship = emergencyRelationship;
+          }
+
+          await emergencyContact.save();
 
           // 尋找自己的員工資料
           const employee = await Employee.findById(_id);
@@ -171,6 +200,7 @@ export async function PATCH(req: Request): Promise<NextResponse> {
           employee.birthday = birthday;
           employee.phone = phone;
           employee.address = address;
+          employee.emergencyContact = emergencyContact._id;
           employee.updatedBy = user._id;
 
           await employee.save();

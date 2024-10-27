@@ -8,6 +8,8 @@ const initialState = {
   isLoading: false,
   currentTab: 'detail',
   isOpenSchedule: false,
+  isCompleteProfile: true,
+  isChangePassword: true,
 };
 
 const useStore = create<State>((set) => {
@@ -25,6 +27,12 @@ const useStore = create<State>((set) => {
     },
     setIsOpenSchedule(isOpenSchedule: boolean) {
       set({ isOpenSchedule });
+    },
+    setIsCompleteProfile(isCompleteProfile: boolean) {
+      set({ isCompleteProfile: isCompleteProfile });
+    },
+    setIsChangePassword(isCompleteProfile: boolean) {
+      set({ isChangePassword: isCompleteProfile });
     },
     onLogout() {
       set({ user: null });

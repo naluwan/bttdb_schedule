@@ -181,8 +181,12 @@ const EmployeePage = () => {
       return data?.data.filter((employee: EmployeeType) => employee.role === 'admin');
     }
 
-    if (filter === 'employee') {
-      return data?.data.filter((employee: EmployeeType) => employee.role === 'employee');
+    if (filter === 'full-time') {
+      return data?.data.filter((employee: EmployeeType) => employee.role === 'full-time');
+    }
+
+    if (filter === 'part-time') {
+      return data?.data.filter((employee: EmployeeType) => employee.role === 'part-time');
     }
 
     return data?.data; // filter === 'all'
@@ -210,7 +214,8 @@ const EmployeePage = () => {
             <SelectContent>
               <SelectItem value='all'>所有</SelectItem>
               <SelectItem value='admin'>管理員</SelectItem>
-              <SelectItem value='employee'>員工</SelectItem>
+              <SelectItem value='full-time'>正職</SelectItem>
+              <SelectItem value='part-time'>兼職</SelectItem>
             </SelectContent>
           </Select>
 
@@ -401,8 +406,12 @@ const EmployeePage = () => {
                               <Label htmlFor='option-one'>管理員</Label>
                             </div>
                             <div className='flex items-center space-x-2'>
-                              <RadioGroupItem value='employee' id='option-two' />
-                              <Label htmlFor='option-two'>員工</Label>
+                              <RadioGroupItem value='full-time' id='option-two' />
+                              <Label htmlFor='option-two'>正職</Label>
+                            </div>
+                            <div className='flex items-center space-x-2'>
+                              <RadioGroupItem value='part-time' id='option-three' />
+                              <Label htmlFor='option-three'>兼職</Label>
                             </div>
                           </RadioGroup>
                         </div>

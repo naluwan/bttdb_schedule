@@ -20,6 +20,15 @@ const ShiftSchema = new mongoose.Schema({
     ref: 'Employee',
     required: true,
   },
+  scheduleType: {
+    type: String,
+    required: true,
+    enum: ['manual', 'automatic'],
+  },
+  month: {
+    type: Number,
+    required: true,
+  },
 });
 
 export default mongoose.models.Shift || mongoose.model('Shift', ShiftSchema);

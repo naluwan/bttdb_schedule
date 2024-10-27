@@ -6,16 +6,20 @@ import axios from 'axios';
 import toast from 'react-hot-toast';
 import { LoaderCircle } from 'lucide-react';
 import Cookies from 'js-cookie';
+import bcrypt from 'bcryptjs';
 
 const SignInPage = () => {
   const router = useRouter();
-  const { isLoading, setUser, setIsLoading } = useStore((state) => {
-    return {
-      isLoading: state.isLoading,
-      setUser: state.setUser,
-      setIsLoading: state.setIsLoading,
-    };
-  });
+  const { isLoading, setUser, setIsLoading, setIsCompleteProfile, setIsChangePassword } =
+    useStore((state) => {
+      return {
+        isLoading: state.isLoading,
+        setUser: state.setUser,
+        setIsLoading: state.setIsLoading,
+        setIsCompleteProfile: state.setIsCompleteProfile,
+        setIsChangePassword: state.setIsChangePassword,
+      };
+    });
   const [accountInfo, setAccountInfo] = useState({ email: '', password: '' });
 
   const atChangeInput = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
@@ -44,7 +48,33 @@ const SignInPage = () => {
         setUser(res.data.user);
         // 設置token
         Cookies.set('BTTDB_JWT_TOKEN', res.data.token);
-        router.push('/schedule');
+
+        // 比對是否修改預設密碼
+        const isMatch = await bcrypt.compare('BTTDB1234', res.data.user?.password);
+
+        // 比對是否完成個人資料
+        const isProfileComplete =
+          res.data.user?.birthday &&
+          res.data.user?.address &&
+          res.data.user?.emergencyContact;
+
+        // 檢查密碼是否為預設密碼
+        const isPasswordChanged = !isMatch;
+
+        if (!isProfileComplete || !isPasswordChanged) {
+          if (!isProfileComplete) {
+            setIsCompleteProfile(false); // 若資料不完整，設定為 false
+          }
+          if (!isPasswordChanged) {
+            setIsChangePassword(false); // 若密碼未修改，設定為 false
+          }
+
+          // 若其中一項未完成，導向個人資訊頁
+          router.push(`/employee/${res.data.user._id}`);
+        } else {
+          // 若資料完整且密碼已修改，導向行程表頁
+          router.push('/schedule');
+        }
       }
       setAccountInfo({ email: '', password: '' });
       setIsLoading(false);

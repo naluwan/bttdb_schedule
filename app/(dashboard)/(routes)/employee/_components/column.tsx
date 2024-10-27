@@ -68,8 +68,10 @@ export const columns = (mutate?: () => void): ColumnDef<Member>[] => [
       switch (role) {
         case 'admin':
           return '管理員';
+        case 'full-time':
+          return '正職';
         default:
-          return '員工';
+          return '兼職';
       }
     },
   },

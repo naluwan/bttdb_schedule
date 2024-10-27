@@ -2,8 +2,16 @@ import { EmployeeType } from '@/models/Employee';
 
 export type UserType = {
   _id: string;
+  id: string;
+  password: string;
+  emergencyContact: string;
+  dateEmployed: Date;
   name: string;
-  role: 'admin' | 'employee';
+  email: string;
+  phone: string;
+  birthday: Date;
+  address: string;
+  role: 'admin' | 'full-time' | 'part-time';
 };
 
 export type State = {
@@ -12,10 +20,14 @@ export type State = {
   isLoading: boolean;
   isOpenSchedule: boolean;
   currentTab: string;
+  isCompleteProfile: boolean;
+  isChangePassword: boolean;
   setUser: (user: UserType) => void;
   setIsLoading: (isLoading: boolean) => void;
   setCurrentTab: (tab: string) => void;
   setIsOpenSchedule: (isOpenSchedule: boolean) => void;
+  setIsCompleteProfile: (isCompleteProfile: boolean) => void;
+  setIsChangePassword: (isChangePassword: boolean) => void;
   onLogout: () => void;
 };
 
@@ -42,4 +54,5 @@ export type EditShiftType = {
   end?: Date;
   isAvailable: boolean;
   employee?: string;
+  employeeName?: string;
 };

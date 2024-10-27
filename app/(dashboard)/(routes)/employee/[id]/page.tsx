@@ -1,6 +1,6 @@
 'use client';
 import Cookies from 'js-cookie';
-import { LoaderCircle, Pencil } from 'lucide-react';
+import { LoaderCircle, OctagonAlert, Pencil } from 'lucide-react';
 import React, { useCallback, useEffect, useState } from 'react';
 import useSWR from 'swr';
 import { useParams, useSearchParams, useRouter } from 'next/navigation';
@@ -27,7 +27,8 @@ import toast from 'react-hot-toast';
 import ChangePassBtn from './_components/change-pass-btn';
 import { UserType } from '@/type';
 import DatePicker from '@/components/datePicker/datePicker';
-
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import bcrypt from 'bcryptjs';
 type EmployeeDetailType = {
   _id: string;
   id: string;
@@ -81,11 +82,23 @@ const EmployeeDetailPage = () => {
     role: '',
   });
 
-  const { user, isLoading, setIsLoading } = useStore((state) => {
+  const {
+    user,
+    isLoading,
+    setIsLoading,
+    isCompleteProfile,
+    isChangePassword,
+    setIsCompleteProfile,
+    setIsChangePassword,
+  } = useStore((state) => {
     return {
       user: state.user,
       isLoading: state.isLoading,
+      isCompleteProfile: state.isCompleteProfile,
+      isChangePassword: state.isChangePassword,
       setIsLoading: state.setIsLoading,
+      setIsCompleteProfile: state.setIsCompleteProfile,
+      setIsChangePassword: state.setIsChangePassword,
     };
   });
 
@@ -123,15 +136,39 @@ const EmployeeDetailPage = () => {
         return {
           ...data.data,
           id: data.data?.id || '',
-          dateEmployed: data.data.dateEmployed || new Date().toISOString(),
-          emergencyId: data.data.emergencyContact?._id || '',
-          emergencyName: data.data.emergencyContact?.name || '',
-          emergencyRelationship: data.data.emergencyContact?.relationship || '',
-          emergencyPhone: data.data.emergencyContact?.phone || '',
+          dateEmployed: data.data?.dateEmployed || new Date().toISOString(),
+          emergencyId: data.data?.emergencyContact?._id || '',
+          emergencyName: data.data?.emergencyContact?.name || '',
+          emergencyRelationship: data.data?.emergencyContact?.relationship || '',
+          emergencyPhone: data.data?.emergencyContact?.phone || '',
         };
       });
     }
   }, [data]);
+
+  useEffect(() => {
+    const checkProfile = async () => {
+      if (!employeeData) return;
+      if (
+        !employeeData.birthday ||
+        !employeeData.address ||
+        !employeeData.emergencyContact
+      ) {
+        setIsCompleteProfile(false);
+      } else {
+        setIsCompleteProfile(true);
+      }
+
+      const isMatch = await bcrypt.compare('BTTDB1234', employeeData.password);
+
+      if (isMatch) {
+        setIsChangePassword(false);
+      } else {
+        setIsChangePassword(true);
+      }
+    };
+    checkProfile();
+  }, [employeeData]);
 
   // 更新員工資訊
   const updateEmployeeDetail = useCallback(
@@ -254,6 +291,26 @@ const EmployeeDetailPage = () => {
         </div>
       ) : (
         <>
+          <div className='mb-4 space-y-4'>
+            {!isCompleteProfile && (
+              <Alert className='bg-yellow-300'>
+                <OctagonAlert className='h-4 w-4' />
+                <AlertTitle>完善個人資料</AlertTitle>
+                <AlertDescription>
+                  請將生日、地址、緊急聯絡人資料填寫完整
+                </AlertDescription>
+              </Alert>
+            )}
+
+            {!isChangePassword && (
+              <Alert className='bg-red-300'>
+                <OctagonAlert className='h-4 w-4' />
+                <AlertTitle>修改預設密碼</AlertTitle>
+                <AlertDescription>請將預設密碼修改</AlertDescription>
+              </Alert>
+            )}
+          </div>
+
           <Card className='relative mx-auto pt-6 shadow-lg'>
             {/* 編輯鈕 */}
             <Button
@@ -465,12 +522,22 @@ const EmployeeDetailPage = () => {
                     </div>
                     <div className='flex items-center space-x-2'>
                       <RadioGroupItem
-                        value='employee'
+                        value='full-time'
                         id='option-two'
                         className='text-xl md:text-2xl'
                       />
                       <Label htmlFor='option-two' className='text-xl md:text-2xl'>
-                        員工
+                        正職
+                      </Label>
+                    </div>
+                    <div className='flex items-center space-x-2'>
+                      <RadioGroupItem
+                        value='part-time'
+                        id='option-three'
+                        className='text-xl md:text-2xl'
+                      />
+                      <Label htmlFor='option-three' className='text-xl md:text-2xl'>
+                        兼職
                       </Label>
                     </div>
                   </RadioGroup>

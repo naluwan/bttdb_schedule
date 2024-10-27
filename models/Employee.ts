@@ -9,7 +9,7 @@ export interface EmployeeType extends Document {
   birthday: Date;
   phone: string;
   address: string;
-  role: 'admin' | 'employee';
+  role: 'admin' | 'full-time' | 'part-time';
   isLock: boolean;
   dateEmployed: Date;
   emergencyContact: {
@@ -30,7 +30,7 @@ const EmployeeSchema = new mongoose.Schema({
   birthday: { type: Date, required: false, default: null },
   phone: { type: String, required: true },
   address: { type: String, required: false, default: '' },
-  role: { type: String, required: true, enum: ['admin', 'employee'] },
+  role: { type: String, required: true, enum: ['admin', 'full-time', 'part-time'] },
   isLock: { type: Boolean, default: false },
   dateEmployed: { type: Date, required: true },
   emergencyContact: { type: mongoose.Schema.Types.ObjectId, ref: 'EmergencyContact' },

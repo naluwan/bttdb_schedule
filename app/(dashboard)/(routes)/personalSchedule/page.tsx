@@ -15,7 +15,7 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 
-import { LoaderCircle } from 'lucide-react';
+import { LoaderCircle, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
 import useStore from '@/store';
@@ -35,22 +35,6 @@ import { EditShiftType, EventType, ShiftDetailType } from '@/type';
 import { EmployeeType } from '@/models/Employee';
 
 moment.locale('zh-tw');
-
-const customMessages = {
-  date: '日期',
-  time: '時間',
-  event: '事件',
-  allDay: '全天',
-  week: '週',
-  work_week: '工作週',
-  day: '日',
-  month: '月',
-  previous: '上一個',
-  next: '下一個',
-  today: '今天',
-  agenda: '議程',
-  showMore: (count: number) => `還有 ${count} 個事件`,
-};
 
 const PersonalSchedulePage = () => {
   const { isLoading, user, setIsLoading, isOpenSchedule } = useStore((state) => {
@@ -77,9 +61,36 @@ const PersonalSchedulePage = () => {
     endDate: new Date(),
     isAvailable: false,
     employee: '',
+    employeeName: '',
+    month: new Date().getMonth() + 1,
   });
   const [filterData, setFilterData] = useState('all');
   const [editShift, setEditShift] = useState<EditShiftType | null>(null);
+  // 導航按鈕文字state
+  const [customMessages, setCustomMessages] = useState({
+    date: '日期',
+    time: '時間',
+    event: '事件',
+    allDay: '全天',
+    week: '週',
+    work_week: '工作週',
+    day: '日',
+    month: '月',
+    previous: view === 'month' ? '上個月' : view === 'day' ? '前一日' : '上一個',
+    next: view === 'month' ? '下個月' : view === 'day' ? '後一日' : '下一個',
+    today: '今天',
+    agenda: '議程',
+    showMore: (count: number) => `還有 ${count} 個事件`,
+  });
+
+  // 修改導航按鈕文字
+  useEffect(() => {
+    setCustomMessages({
+      ...customMessages,
+      previous: view === 'month' ? '上個月' : view === 'day' ? '前一日' : '上一個',
+      next: view === 'month' ? '下個月' : view === 'day' ? '後一日' : '下一個',
+    });
+  }, [view]);
 
   // 獲取token
   const token = Cookies.get('BTTDB_JWT_TOKEN');
@@ -101,45 +112,96 @@ const PersonalSchedulePage = () => {
     }
   }, [user]);
 
-  // 點擊日期事件
-  const handleSelect = ({ start, end }: { start: Date; end: Date }) => {
-    const isSelected = eventsData.some(
-      (event) =>
-        new Date(event.start).toLocaleDateString() ===
-          new Date(start).toLocaleDateString() &&
-        event.title.includes(user?.name as string),
-    );
+  // 檢查過去月份
+  const checkMonth = (targetDate: Date) => {
+    const currentDate = new Date();
+    const currentMonth = currentDate.getMonth() + 1; // 當前月份 (1-12)
+    const currentYear = currentDate.getFullYear(); // 當前年
 
-    if (!isSelected || isOpenSchedule) {
-      setSelectedDate({ start, end });
-      setOpen(true);
-    } else {
-      toast('已關閉排班', { icon: '🚫' });
+    const targetMonth = targetDate.getMonth() + 1; // 目標月份 (1-12)
+    const targetYear = targetDate.getFullYear(); // 目標年
+
+    // 檢查年份和月份
+    if (
+      targetYear < currentYear ||
+      (targetYear === currentYear && targetMonth < currentMonth)
+    ) {
+      return false; // 過去的月份，無法編輯
     }
+
+    return true; // 當前或未來月份，允許編輯或新增
   };
+
+  // 點擊日期事件
+  const handleSelect = useCallback(
+    ({ start, end }: { start: Date; end: Date }) => {
+      const nowMonth = new Date().getMonth() + 1;
+      const isSelected = eventsData.some(
+        (event) =>
+          new Date(event.start).toLocaleDateString() ===
+            new Date(start).toLocaleDateString() && event.employee === shift.employee,
+      );
+
+      if (!checkMonth(start)) {
+        toast('過去的月份，無法新增', { icon: '🚫' });
+        return;
+      }
+
+      if ((!isSelected && isOpenSchedule) || (user?.role === 'admin' && !isSelected)) {
+        setSelectedDate({ start, end });
+        setOpen(true);
+        setShift((prev) => {
+          return { ...prev, month: start.getMonth() + 1 };
+        });
+      } else if (isSelected) {
+        if (user?.role === 'admin') {
+          toast(
+            `${
+              filterData === 'all' ? '你' : `『${shift?.employeeName}』 `
+            }已排定此日期，請使用編輯排班功能`,
+            {
+              icon: '⚠️',
+            },
+          );
+        } else {
+          toast('你已排定此日期，，請使用編輯排班功能', { icon: '⚠️' });
+        }
+      } else if (!isOpenSchedule) {
+        toast('已關閉排班', { icon: '🚫' });
+      }
+    },
+    [isOpenSchedule, user, shift],
+  );
 
   // 月份導航事件
   const onNavigate = useCallback(
     (newDate: Date) => {
-      return setDate(newDate);
+      setDate(newDate);
+      setShift((prev) => {
+        return { ...prev, month: newDate.getMonth() + 1 };
+      });
     },
-    [setDate],
+    [setDate, setShift],
   );
 
   // 取消排班
-  const atCancel = () => {
+  const atCancel = useCallback(() => {
     setOpen(false);
-    setShift({
-      startDate: new Date(),
-      endDate: new Date(),
-      isAvailable: false,
-      employee: user?._id as string,
-    });
-    setSelectedDate({
-      start: new Date(),
-      end: new Date(),
-    });
-  };
+    setTimeout(() => {
+      setSelectedDate({
+        start: new Date(),
+        end: new Date(),
+      });
+      setShift({
+        startDate: new Date(),
+        endDate: new Date(),
+        isAvailable: false,
+        employee: user?._id as string,
+        employeeName: '',
+        month: new Date().getMonth() + 1,
+      });
+    }, 100);
+  }, [user]);
 
   // 定義一個 function 來調用 API 獲取排班資料
   const getEmployeeShift = async () => {
@@ -198,9 +260,8 @@ const PersonalSchedulePage = () => {
   // 篩選員工排班資料
   useEffect(() => {
     if (filterData === 'all') {
-      console.log('[data]', data);
       setEventsData(
-        data?.data.map((shiftDetail: ShiftDetailType) => {
+        data?.data?.map((shiftDetail: ShiftDetailType) => {
           return {
             start: shiftDetail.startDate,
             end: shiftDetail.endDate,
@@ -210,18 +271,23 @@ const PersonalSchedulePage = () => {
             isAvailable: shiftDetail.isAvailable,
             employee: shiftDetail.employee._id,
             _id: shiftDetail._id,
+            employeeName: shiftDetail.employee.name,
           };
         }),
       );
       setShift((prev) => {
-        return { ...prev, employee: user?._id as string };
+        return {
+          ...prev,
+          employee: user?._id as string,
+          employeeName: user?.name as string,
+        };
       });
     } else {
       const filteredShift = data?.data.filter((shiftDetail: ShiftDetailType) => {
         return shiftDetail.employee._id === filterData;
       });
       setEventsData(
-        filteredShift.map((filteredShiftDetail: ShiftDetailType) => {
+        filteredShift?.map((filteredShiftDetail: ShiftDetailType) => {
           return {
             start: filteredShiftDetail.startDate,
             end: filteredShiftDetail.endDate,
@@ -231,37 +297,51 @@ const PersonalSchedulePage = () => {
             isAvailable: filteredShiftDetail.isAvailable,
             employee: filteredShiftDetail.employee._id,
             _id: filteredShiftDetail._id,
+            employeeName: filteredShiftDetail.employee.name,
           };
         }),
       );
+
       setShift((prev) => {
-        return { ...prev, employee: filterData };
+        return {
+          ...prev,
+          employee: filterData,
+          employeeName:
+            filteredShift[0]?.employee.name ||
+            employeeData?.data.find(
+              (employee: EmployeeType) => employee._id === filterData,
+            )?.name,
+        };
       });
     }
-  }, [filterData, data, user]);
+  }, [filterData, data, user, selectedDate]);
 
   // 送出排班
-  const atSubmit = async (e: React.MouseEvent) => {
-    e.preventDefault();
-    const res = await axios.post('/api/shift', shift, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    });
+  const atSubmit = useCallback(
+    async (e: React.MouseEvent) => {
+      e.preventDefault();
+      setIsLoading(true);
+      const res = await axios.post('/api/shift', shift, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
 
-    const result = res.data;
+      const result = res.data;
 
-    if (result.status === 201 || result.status === 200) {
-      atCancel();
-      setEventsData([]);
-      mutate();
-      toast.success(result.message);
-    } else {
-      toast.error(result.message);
-    }
-    // 取消Loading狀態
-    setIsLoading(false);
-  };
+      if (result.status === 201 || result.status === 200) {
+        atCancel();
+        setEventsData([]);
+        mutate();
+        toast.success(result.message);
+      } else {
+        toast.error(result.message);
+      }
+      // 取消Loading狀態
+      setIsLoading(false);
+    },
+    [shift, token, mutate, atCancel, setIsLoading, setEventsData],
+  );
 
   // 清除事件資料
   useEffect(() => {
@@ -271,42 +351,83 @@ const PersonalSchedulePage = () => {
   }, []);
 
   // 修改排班
-  const atEditShift = (event: EventType) => {
-    if (isOpenSchedule || user?.role === 'admin') {
-      setOpenEdit(true);
-      const selectedEmployeeEvent = eventsData.find(
-        (e) => e.employee === event.employee && e.start === event.start,
-      );
+  const atEditShift = useCallback(
+    (event: EventType) => {
+      if (!checkMonth(new Date(event.start))) {
+        toast('過去的班別，無法編輯', { icon: '🚫' });
+        return;
+      }
 
-      console.log('[selectedEmployeeEvent]', selectedEmployeeEvent);
-      setEditShift(selectedEmployeeEvent as EditShiftType);
-    } else {
-      toast('已關閉排班', { icon: '🚫' });
-    }
-  };
+      if (isOpenSchedule || user?.role === 'admin') {
+        setOpenEdit(true);
+        const selectedEmployeeEvent = eventsData.find(
+          (e) => e.employee === event.employee && e.start === event.start,
+        );
 
-  const atUpdateShift = async (e: React.MouseEvent) => {
-    e.preventDefault();
-    const res = await axios.patch(`/api/shift`, editShift, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    });
+        setEditShift(selectedEmployeeEvent as EditShiftType);
+      } else {
+        toast('已關閉排班', { icon: '🚫' });
+      }
+    },
+    [user, eventsData, isOpenSchedule],
+  );
 
-    const result = res.data;
+  // 送出編輯排班
+  const atUpdateShift = useCallback(
+    async (e: React.MouseEvent) => {
+      e.preventDefault();
+      setIsLoading(true);
+      const res = await axios.patch(`/api/shift`, editShift, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
 
-    if (result.status === 201 || result.status === 200) {
-      setEventsData([]);
-      setOpenEdit(false);
-      setEditShift(null);
-      mutate();
-      toast.success(result.message);
-    } else {
-      toast.error(result.message);
-    }
-    // 取消Loading狀態
-    setIsLoading(false);
-  };
+      const result = res.data;
+
+      if (result.status === 201 || result.status === 200) {
+        setEventsData([]);
+        setOpenEdit(false);
+        setEditShift(null);
+        mutate();
+        toast.success(result.message);
+      } else {
+        toast.error(result.message);
+      }
+      // 取消Loading狀態
+      setIsLoading(false);
+    },
+    [editShift, token, mutate, setIsLoading, setEventsData, setOpenEdit, setEditShift],
+  );
+
+  // 刪除排班
+  const atDeleteShift = useCallback(
+    async (e: React.MouseEvent, shiftId: string) => {
+      e.preventDefault();
+      setIsLoading(true);
+      const data = { shiftId };
+      const res = await axios.delete(`/api/shift`, {
+        data,
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      const result = res.data;
+
+      if (result.status === 201 || result.status === 200) {
+        toast.success(result.message);
+        setOpenEdit(false);
+        setEditShift(null);
+        mutate();
+      } else {
+        toast.error(result.message);
+      }
+      // 取消Loading狀態
+      setIsLoading(false);
+    },
+    [editShift, token, mutate, setOpenEdit, setEditShift, setIsLoading],
+  );
 
   return (
     <div className='p-6'>
@@ -387,12 +508,13 @@ const PersonalSchedulePage = () => {
             <DialogContent className='hide-scrollbar max-h-[90%] overflow-y-scroll'>
               <DialogHeader>
                 <DialogTitle>
-                  {new Date(selectedDate.start).toLocaleDateString()} 排班
+                  新增 {new Date(selectedDate.start).toLocaleDateString()}{' '}
+                  {user?.role === 'admin' && `『${shift?.employeeName}』 `}班別
                 </DialogTitle>
                 <DialogDescription></DialogDescription>
               </DialogHeader>
               {isLoading ? (
-                <div className='flex h-[474px] w-full items-center justify-center md:h-[232px]'>
+                <div className='flex h-auto w-full items-center justify-center md:h-auto'>
                   <LoaderCircle className='mr-3 h-5 w-5 animate-spin' />
                   <p>排班中，請稍候...</p>
                 </div>
@@ -440,12 +562,13 @@ const PersonalSchedulePage = () => {
             <DialogContent className='hide-scrollbar max-h-[90%] overflow-y-scroll'>
               <DialogHeader>
                 <DialogTitle>
-                  {new Date(editShift?.start as Date).toLocaleDateString()} 排班
+                  編輯 {new Date(editShift?.start as Date).toLocaleDateString()}{' '}
+                  {user?.role === 'admin' && `『${editShift?.employeeName}』 `}班別
                 </DialogTitle>
                 <DialogDescription></DialogDescription>
               </DialogHeader>
               {isLoading ? (
-                <div className='flex h-[474px] w-full items-center justify-center md:h-[232px]'>
+                <div className='flex h-auto w-full items-center justify-center md:h-auto'>
                   <LoaderCircle className='mr-3 h-5 w-5 animate-spin' />
                   <p>更新排班中，請稍候...</p>
                 </div>
@@ -478,18 +601,29 @@ const PersonalSchedulePage = () => {
                 </div>
               )}
 
-              <DialogFooter className='gap-4 p-0'>
-                <Button type='submit' onClick={atUpdateShift}>
-                  更新
-                </Button>
-                <DialogClose
-                  onClick={() => {
-                    setOpenEdit(false);
-                    setEditShift(null);
-                  }}
+              <DialogFooter className='relative'>
+                <Button
+                  variant='ghost'
+                  onClick={(e) => atDeleteShift(e, editShift?._id as string)}
+                  className='absolute left-0 transition-all duration-500 hover:scale-125 hover:bg-inherit'
                 >
-                  取消
-                </DialogClose>
+                  <Trash2 className='h-6 w-6 text-red-500' />
+                </Button>
+                <div className='flex items-center justify-end gap-4 p-0'>
+                  <Button type='submit' onClick={atUpdateShift}>
+                    更新
+                  </Button>
+                  <DialogClose
+                    onClick={() => {
+                      setOpenEdit(false);
+                      setTimeout(() => {
+                        setEditShift(null);
+                      }, 100);
+                    }}
+                  >
+                    取消
+                  </DialogClose>
+                </div>
               </DialogFooter>
             </DialogContent>
           </Dialog>
