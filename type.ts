@@ -11,7 +11,7 @@ export type UserType = {
   phone: string;
   birthday: Date;
   address: string;
-  role: 'admin' | 'full-time' | 'part-time';
+  role: 'admin' | 'full-time' | 'part-time' | 'super-admin';
 };
 
 export type State = {
@@ -23,6 +23,7 @@ export type State = {
   isCompleteProfile: boolean;
   isChangePassword: boolean;
   isInitialized: boolean;
+  cpnyName: string | null;
   setUser: (user: UserType) => void;
   setIsLoading: (isLoading: boolean) => void;
   setCurrentTab: (tab: string) => void;
@@ -30,6 +31,7 @@ export type State = {
   setIsCompleteProfile: (isCompleteProfile: boolean) => void;
   setIsChangePassword: (isChangePassword: boolean) => void;
   setIsInitialized: (isInitialized: boolean) => void;
+  setCpnyName: (cpnyName: string) => void;
   onLogout: () => void;
 };
 

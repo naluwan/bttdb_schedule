@@ -24,7 +24,8 @@ export async function verifyToken(req: AuthenticatedRequest) {
       return NextResponse.json({ status: 401, message: '無效Token' });
     }
 
-    const user = await Employee.findById(decoded.id).select('-password');
+    // const user = await Employee.findById(decoded.id).select('-password');
+    const user = await Employee.findById(decoded.id);
 
     if (!user) {
       return NextResponse.json({ status: 401, message: '無此員工' });

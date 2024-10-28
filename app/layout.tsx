@@ -7,8 +7,8 @@ import ProtectedProvider from '@/components/providers/protected-provider';
 const inter = Inter({ subsets: ['latin'] });
 
 export const metadata: Metadata = {
-  title: 'Back To The Day Before 排班系統',
-  description: '排班、打卡系統',
+  title: 'EZY Schedule 排班系統',
+  description: '簡易、快速排班系統、所有員工只需排好休假，就能一鍵補齊所有剩餘班別',
 };
 
 const RootLayout = ({ children }: { children: React.ReactNode }) => {

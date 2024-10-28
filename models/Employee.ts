@@ -9,7 +9,7 @@ export interface EmployeeType extends Document {
   birthday: Date;
   phone: string;
   address: string;
-  role: 'admin' | 'full-time' | 'part-time';
+  role: 'super-admin' | 'admin' | 'full-time' | 'part-time';
   isLock: boolean;
   dateEmployed: Date;
   emergencyContact: {
@@ -18,6 +18,7 @@ export interface EmployeeType extends Document {
     relationship: string;
     phone: string;
   };
+  company: { _id: mongoose.Schema.Types.ObjectId; enName: string };
   updatedAt: Date;
   updatedBy: { _id: mongoose.Schema.Types.ObjectId; name: string };
 }
@@ -30,10 +31,18 @@ const EmployeeSchema = new mongoose.Schema({
   birthday: { type: Date, required: false, default: null },
   phone: { type: String, required: true },
   address: { type: String, required: false, default: '' },
-  role: { type: String, required: true, enum: ['admin', 'full-time', 'part-time'] },
+  role: {
+    type: String,
+    required: true,
+    enum: ['super-admin', 'admin', 'full-time', 'part-time'],
+  },
   isLock: { type: Boolean, default: false },
   dateEmployed: { type: Date, required: true },
-  emergencyContact: { type: mongoose.Schema.Types.ObjectId, ref: 'EmergencyContact' },
+  emergencyContact: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'EmergencyContact',
+  },
+  company: { type: mongoose.Schema.Types.ObjectId, ref: 'Company' },
   updatedBy: { type: mongoose.Schema.Types.ObjectId, ref: 'Employee' },
 });
 

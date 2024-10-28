@@ -11,6 +11,7 @@ const initialState = {
   isCompleteProfile: true,
   isChangePassword: true,
   isInitialized: false,
+  cpnyName: null,
 };
 
 const useStore = create<State>((set) => {
@@ -30,13 +31,16 @@ const useStore = create<State>((set) => {
       set({ isOpenSchedule });
     },
     setIsCompleteProfile(isCompleteProfile: boolean) {
-      set({ isCompleteProfile: isCompleteProfile });
+      set({ isCompleteProfile });
     },
-    setIsChangePassword(isCompleteProfile: boolean) {
-      set({ isChangePassword: isCompleteProfile });
+    setIsChangePassword(isChangePassword: boolean) {
+      set({ isChangePassword });
     },
     setIsInitialized(isInitialized: boolean) {
-      set({ isInitialized: isInitialized });
+      set({ isInitialized });
+    },
+    setCpnyName(cpnyName: string) {
+      set({ cpnyName });
     },
     onLogout() {
       set({ user: null });

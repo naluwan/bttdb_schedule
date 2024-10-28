@@ -11,6 +11,13 @@ const SettingSchema = new mongoose.Schema({
   isOpenSchedule: {
     type: Boolean,
   },
+  company: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Company',
+    required: true,
+  },
 });
+
+SettingSchema.set('timestamps', true);
 
 export default mongoose.models.Setting || mongoose.model('Setting', SettingSchema);

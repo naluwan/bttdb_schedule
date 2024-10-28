@@ -1,8 +1,8 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import useStore from '@/store';
 import axios from 'axios';
 import Cookies from 'js-cookie';
-import { useRouter } from 'next/navigation';
+import { useParams, useRouter } from 'next/navigation';
 import toast from 'react-hot-toast';
 import { usePathname } from 'next/navigation';
 
@@ -10,18 +10,28 @@ const useAuth = () => {
   const router = useRouter();
   const pathName = usePathname();
 
-  const { setUser, setIsInitialized } = useStore((state) => ({
-    setUser: state.setUser,
-    setIsInitialized: state.setIsInitialized,
-  }));
+  const { setUser, cpnyName, setIsInitialized, isInitialized, setCpnyName } = useStore(
+    (state) => ({
+      setUser: state.setUser,
+      cpnyName: state.cpnyName,
+      setIsInitialized: state.setIsInitialized,
+      isInitialized: state.isInitialized,
+      setCpnyName: state.setCpnyName,
+    }),
+  );
 
   useEffect(() => {
     const token = Cookies.get('BTTDB_JWT_TOKEN');
 
+    // 嘗試從 localStorage 獲取 cpnyName
+    const storedCpnyName = localStorage.getItem('EZY_SCHEDULE_CPNY_NAME');
+    if (storedCpnyName) {
+      setCpnyName(storedCpnyName);
+    }
     if (token) {
       // 每次呼叫時驗證token
       axios
-        .post('/api/auth/verify', null, {
+        .post(`/api/${cpnyName}/auth/verify`, null, {
           headers: {
             Authorization: `Bearer ${token}`,
           },
@@ -33,7 +43,7 @@ const useAuth = () => {
           } else {
             Cookies.remove('BTTDB_JWT_TOKEN');
             toast.error(res.data.message);
-            router.push('/sign-in');
+            router.push(`/${cpnyName}/sign-in`);
           }
         })
         .finally(() => {
@@ -41,7 +51,7 @@ const useAuth = () => {
         })
         .catch(() => {
           Cookies.remove('BTTDB_JWT_TOKEN');
-          router.push('/sign-in');
+          router.push(`/${cpnyName}/sign-in`);
         });
     }
   }, []);

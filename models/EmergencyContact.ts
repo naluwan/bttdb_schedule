@@ -6,5 +6,7 @@ const EmergencyContactSchema = new mongoose.Schema({
   phone: { type: String, required: true },
 });
 
+EmergencyContactSchema.set('timestamps', true);
+
 export default mongoose.models.EmergencyContact ||
   mongoose.model('EmergencyContact', EmergencyContactSchema);

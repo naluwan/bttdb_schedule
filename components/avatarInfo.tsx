@@ -18,8 +18,10 @@ import { Label } from './ui/label';
 import Cookies from 'js-cookie';
 import axios from 'axios';
 import toast from 'react-hot-toast';
+import { useParams } from 'next/navigation';
 
 const AvatarInfo = () => {
+  const { cpnyName } = useParams();
   const [open, setOpen] = useState(false);
   const { onLogout, user, isOpenSchedule, setIsOpenSchedule } = useStore((state) => {
     return {
@@ -38,7 +40,7 @@ const AvatarInfo = () => {
 
   const atSwitchOpenSchedule = useCallback(async () => {
     const res = await axios.patch(
-      '/api/setting/openSchedule',
+      `/api/${cpnyName}/setting/openSchedule`,
       {},
       { headers: { Authorization: `Bearer ${token}` } },
     );
@@ -66,7 +68,7 @@ const AvatarInfo = () => {
         <DropdownMenuLabel>帳號資訊</DropdownMenuLabel>
         <DropdownMenuSeparator />
         <DropdownMenuItem onClick={atClickItem}>
-          <Link href={`/employee/${user?._id}`} className='flex w-full'>
+          <Link href={`/${cpnyName}/employee/${user?._id}`} className='flex w-full'>
             <User className='mr-2 h-4 w-4' />
             <span>個人資料</span>
           </Link>
@@ -74,7 +76,7 @@ const AvatarInfo = () => {
 
         <DropdownMenuSeparator />
 
-        {user?.role === 'admin' && (
+        {(user?.role === 'admin' || user?.role === 'super-admin') && (
           <>
             <DropdownMenuItem onClick={atClickItem}>
               <div className='flex items-center space-x-2'>

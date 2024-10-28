@@ -33,6 +33,15 @@ export const checkAdminAndAdministrative = (user: EmployeeType) => {
   }
 };
 
+export const checkAdminAndSuperAdmin = (user: EmployeeType) => {
+  if (
+    user.role !== 'admin' &&
+    String(user._id) !== process.env.NEXT_PUBLIC_SUPER_ADMIN_ID
+  ) {
+    throw new Error('權限不足');
+  }
+};
+
 export const checkSuperAdmin = (user: EmployeeType) => {
   if (String(user._id) !== process.env.NEXT_PUBLIC_SUPER_ADMIN_ID) {
     throw new Error('權限不足');
