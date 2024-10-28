@@ -50,6 +50,7 @@ export type EventType = {
   title: string;
   isAvailable: boolean;
   employee: string;
+  employeeName?: string;
 };
 
 export type EditShiftType = {

@@ -2,11 +2,7 @@ import { NextResponse } from 'next/server';
 import connect from '@/lib/mongodb';
 import Employee from '@/models/Employee';
 import bcrypt from 'bcryptjs';
-import {
-  authenticateToken,
-  checkAdminAndSuperAdmin,
-  checkSuperAdmin,
-} from '@/lib/authMiddleware';
+import { authenticateToken, checkAdminAndSuperAdmin } from '@/lib/authMiddleware';
 import Company from '@/models/Company';
 
 connect();

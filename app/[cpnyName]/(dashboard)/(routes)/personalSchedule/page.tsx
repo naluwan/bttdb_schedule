@@ -5,17 +5,18 @@ import { Calendar, momentLocalizer, View } from 'react-big-calendar';
 import moment from 'moment';
 import 'moment/locale/zh-tw';
 import 'react-big-calendar/lib/css/react-big-calendar.css';
+import { startOfDay, endOfDay } from 'date-fns';
 import {
-  Dialog,
-  DialogClose,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog';
+  AlertDialog,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
 
-import { LoaderCircle, Trash2 } from 'lucide-react';
+import { Ellipsis, LoaderCircle, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
 import useStore from '@/store';
@@ -33,8 +34,19 @@ import toast from 'react-hot-toast';
 import useSWR from 'swr';
 import { EditShiftType, EventType, ShiftDetailType } from '@/type';
 import { EmployeeType } from '@/models/Employee';
+import ProgressBar from '@/components/progressBar';
+import { formatInTimeZone } from 'date-fns-tz';
 
 moment.locale('zh-tw');
+
+interface ShiftType {
+  startDate: Date;
+  endDate: Date;
+  isAvailable: boolean | null;
+  employee: string;
+  employeeName: string;
+  month: number;
+}
 
 const PersonalSchedulePage = () => {
   const { isLoading, user, setIsLoading, isOpenSchedule } = useStore((state) => {
@@ -52,14 +64,18 @@ const PersonalSchedulePage = () => {
   const [date, setDate] = useState(new Date());
   const [open, setOpen] = useState(false);
   const [openEdit, setOpenEdit] = useState(false);
+  // 進度條狀態
+  const [uploadProgress, setUploadProgress] = useState(0);
+  const [autoScheduleLoading, setAutoScheduleLoading] = useState(false);
+  const [deleteAutoScheduleLoading, setDeleteAutoScheduleLoading] = useState(false);
   const [selectedDate, setSelectedDate] = useState({
     start: new Date(),
     end: new Date(),
   });
-  const [shift, setShift] = useState({
-    startDate: new Date(),
-    endDate: new Date(),
-    isAvailable: false,
+  const [shift, setShift] = useState<ShiftType>({
+    startDate: startOfDay(new Date()),
+    endDate: endOfDay(new Date()),
+    isAvailable: null,
     employee: '',
     employeeName: '',
     month: new Date().getMonth() + 1,
@@ -103,7 +119,7 @@ const PersonalSchedulePage = () => {
     if (!token) {
       router.push(`/${cpnyName}/sign-in`);
     }
-  }, [router, token]);
+  }, [router, token, cpnyName]);
 
   // 設置員工ID
   useEffect(() => {
@@ -113,6 +129,25 @@ const PersonalSchedulePage = () => {
       });
     }
   }, [user]);
+
+  //呼叫api獲取進度條
+  const checkProgress = useCallback(async () => {
+    const res = await axios.get(`/api/${cpnyName}/shift/autoSchedule`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    const data = await res.data;
+    setUploadProgress(data.progress);
+  }, [token, cpnyName]);
+
+  //定時詢問進度
+  useEffect(() => {
+    if (isLoading) {
+      const intervalId = setInterval(checkProgress, 1000);
+
+      // 清除定时器
+      return () => clearInterval(intervalId);
+    }
+  }, [isLoading, checkProgress]);
 
   // 檢查過去月份
   const checkMonth = (targetDate: Date) => {
@@ -137,7 +172,6 @@ const PersonalSchedulePage = () => {
   // 點擊日期事件
   const handleSelect = useCallback(
     ({ start, end }: { start: Date; end: Date }) => {
-      const nowMonth = new Date().getMonth() + 1;
       const isSelected = eventsData.some(
         (event) =>
           new Date(event.start).toLocaleDateString() ===
@@ -176,7 +210,7 @@ const PersonalSchedulePage = () => {
         toast('已關閉排班', { icon: '🚫' });
       }
     },
-    [isOpenSchedule, user, shift],
+    [isOpenSchedule, user, shift, eventsData, filterData],
   );
 
   // 月份導航事件
@@ -195,13 +229,13 @@ const PersonalSchedulePage = () => {
     setOpen(false);
     setTimeout(() => {
       setSelectedDate({
-        start: new Date(),
-        end: new Date(),
+        start: startOfDay(new Date()),
+        end: endOfDay(new Date()),
       });
       setShift({
-        startDate: new Date(),
-        endDate: new Date(),
-        isAvailable: false,
+        startDate: startOfDay(new Date()),
+        endDate: endOfDay(new Date()),
+        isAvailable: null,
         employee: user?._id as string,
         employeeName: '',
         month: new Date().getMonth() + 1,
@@ -272,8 +306,16 @@ const PersonalSchedulePage = () => {
       setEventsData(
         data?.data?.map((shiftDetail: ShiftDetailType) => {
           return {
-            start: shiftDetail.startDate,
-            end: shiftDetail.endDate,
+            start: formatInTimeZone(
+              shiftDetail.startDate,
+              'Asia/Taipei',
+              'yyyy-MM-dd HH:mm:ssXXX',
+            ),
+            end: formatInTimeZone(
+              shiftDetail.endDate,
+              'Asia/Taipei',
+              'yyyy-MM-dd HH:mm:ssXXX',
+            ),
             title: `${shiftDetail.employee.name} ${
               shiftDetail.isAvailable ? '上班' : '休假'
             }`,
@@ -298,8 +340,16 @@ const PersonalSchedulePage = () => {
       setEventsData(
         filteredShift?.map((filteredShiftDetail: ShiftDetailType) => {
           return {
-            start: filteredShiftDetail.startDate,
-            end: filteredShiftDetail.endDate,
+            start: formatInTimeZone(
+              filteredShiftDetail.startDate,
+              'Asia/Taipei',
+              'yyyy-MM-dd HH:mm:ssXXX',
+            ),
+            end: formatInTimeZone(
+              filteredShiftDetail.endDate,
+              'Asia/Taipei',
+              'yyyy-MM-dd HH:mm:ssXXX',
+            ),
             title: `${filteredShiftDetail.employee.name} ${
               filteredShiftDetail.isAvailable ? '上班' : '休假'
             }`,
@@ -323,7 +373,7 @@ const PersonalSchedulePage = () => {
         };
       });
     }
-  }, [filterData, data, user, selectedDate]);
+  }, [filterData, data, user, selectedDate, employeeData]);
 
   // 送出排班
   const atSubmit = useCallback(
@@ -349,7 +399,7 @@ const PersonalSchedulePage = () => {
       // 取消Loading狀態
       setIsLoading(false);
     },
-    [shift, token, mutate, atCancel, setIsLoading, setEventsData],
+    [shift, token, mutate, atCancel, setIsLoading, setEventsData, cpnyName],
   );
 
   // 清除事件資料
@@ -372,6 +422,11 @@ const PersonalSchedulePage = () => {
         const selectedEmployeeEvent = eventsData.find(
           (e) => e.employee === event.employee && e.start === event.start,
         );
+
+        if (selectedEmployeeEvent) {
+          selectedEmployeeEvent.start = startOfDay(new Date(selectedEmployeeEvent.start));
+          selectedEmployeeEvent.end = endOfDay(new Date(selectedEmployeeEvent.start));
+        }
 
         setEditShift(selectedEmployeeEvent as EditShiftType);
       } else {
@@ -435,8 +490,79 @@ const PersonalSchedulePage = () => {
       // 取消Loading狀態
       setIsLoading(false);
     },
-    [editShift, token, mutate, setOpenEdit, setEditShift, setIsLoading],
+    [editShift, token, mutate, setOpenEdit, setEditShift, setIsLoading, cpnyName],
   );
+
+  // 自動排班
+  const atAutoSchedule = useCallback(
+    async (e: React.MouseEvent) => {
+      e.preventDefault();
+      setAutoScheduleLoading(true);
+      const nowMonth = date.getMonth() + 1;
+      const filteredEmployee = employeeData.data?.map((employee: EmployeeType) => {
+        return { name: employee.name, employeeId: employee._id };
+      });
+
+      const data = { filteredEmployee, month: nowMonth };
+
+      const res = await axios.post(`/api/${cpnyName}/shift/autoSchedule`, data, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      if (res.status === 201 || res.status === 200) {
+        if (res.data.status === 201 || res.data.status === 200) {
+          toast.success(res.data.message);
+          mutate();
+        } else {
+          toast.error(res.data.message);
+        }
+      }
+
+      // 取消Loading狀態
+      setAutoScheduleLoading(false);
+    },
+    [employeeData, token, cpnyName, date, setAutoScheduleLoading, mutate],
+  );
+
+  // 移除自動排班
+  const atRemoveAutoSchedule = useCallback(
+    async (e: React.MouseEvent) => {
+      e.preventDefault();
+      setDeleteAutoScheduleLoading(true);
+      const nowMonth = date.getMonth() + 1;
+      const res = await axios.delete(`/api/${cpnyName}/shift/autoSchedule`, {
+        data: { month: nowMonth },
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
+      if (res.status === 201 || res.status === 200) {
+        toast.success(res.data.message);
+        mutate();
+      } else {
+        toast.error(res.data.message);
+      }
+      // 取消Loading狀態
+      setDeleteAutoScheduleLoading(false);
+    },
+    [token, cpnyName, mutate, setDeleteAutoScheduleLoading, date],
+  );
+
+  // 記錄員工休假天數
+  const employeeAvailability = useMemo(() => {
+    if (!eventsData) return {}; // 確保 eventsData 存在
+    return eventsData.reduce((acc: Record<string, number>, eventShift) => {
+      if (
+        eventShift.isAvailable === false &&
+        new Date(eventShift.start).getMonth() === date.getMonth()
+      ) {
+        const employeeName = eventShift.employeeName || '錯誤';
+        acc[employeeName] = (acc[employeeName] || 0) + 1;
+      }
+      return acc;
+    }, {} as Record<string, number>);
+  }, [eventsData, date]);
 
   return (
     <div className='p-6'>
@@ -444,87 +570,125 @@ const PersonalSchedulePage = () => {
         {/* 日曆部分，顯示當天的上班人員 */}
         <div className='container mx-auto p-4'>
           <h1 className='mb-4 text-center text-2xl font-bold'>排班日曆</h1>
-          {user?.role === 'admin' && (
-            <div className='mb-4'>
-              <Select
-                onValueChange={(value: string) => setFilterData(value)}
-                defaultValue='all'
-              >
-                {/* 設置 w-full 使其填滿父容器 */}
-                <SelectTrigger className='w-full'>
-                  <SelectValue placeholder='請選擇顯示員工' />
-                </SelectTrigger>
-                <SelectContent className='w-full'>
-                  <SelectItem value='all'>全部員工</SelectItem>
-                  {!employeeDataLoading &&
-                    employeeData?.data.map((employee: EmployeeType) => (
-                      <SelectItem key={employee._id} value={employee._id}>
-                        {employee.name}
-                      </SelectItem>
-                    ))}
-                </SelectContent>
-              </Select>
+          {user?.role === 'admin' ||
+            (user?.role === 'super-admin' && (
+              <div className='mb-4 flex flex-col justify-between md:flex-row'>
+                <div className='mb-4'>
+                  <Select
+                    onValueChange={(value: string) => setFilterData(value)}
+                    defaultValue='all'
+                  >
+                    {/* 設置 w-full 使其填滿父容器 */}
+                    <SelectTrigger className='w-full'>
+                      <SelectValue placeholder='請選擇顯示員工' />
+                    </SelectTrigger>
+                    <SelectContent className='w-full'>
+                      <SelectItem value='all'>全部員工</SelectItem>
+                      {!employeeDataLoading &&
+                        employeeData?.data.map((employee: EmployeeType) => (
+                          <SelectItem key={employee._id} value={employee._id}>
+                            {employee.name}
+                          </SelectItem>
+                        ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                {((user?.role as 'admin' | 'super-admin') === 'admin' ||
+                  (user?.role as 'admin' | 'super-admin') === 'super-admin') && (
+                  <div className='flex justify-center gap-4'>
+                    <Button variant='default' onClick={(e) => atAutoSchedule(e)}>
+                      自動排班
+                    </Button>
+                    <Button
+                      variant='destructive'
+                      onClick={(e) => atRemoveAutoSchedule(e)}
+                    >
+                      移除自動排班
+                    </Button>
+                  </div>
+                )}
+              </div>
+            ))}
+
+          {employeeAvailability && (
+            <div className='mb-4 flex flex-col gap-4 md:flex-row'>
+              {Object.entries(employeeAvailability).map(([employeeName, count]) => (
+                <div
+                  className='rounded-lg border p-2'
+                  key={employeeName}
+                >{`${employeeName}: 本月排休 ${count} 天`}</div>
+              ))}
             </div>
           )}
 
-          <Calendar
-            views={['month']}
-            selectable={
-              isOpenSchedule || user?.role === 'admin' || user?.role === 'super-admin'
-            }
-            localizer={localizer}
-            formats={{
-              dateFormat: 'MM/DD',
-              dayFormat: (date, culture) =>
-                localizer.format(date, 'MM月DD日 ddd', culture),
+          {autoScheduleLoading || deleteAutoScheduleLoading ? (
+            <div className='h-full w-full'>
+              <div className='flex h-auto w-full'>
+                <p>{autoScheduleLoading ? '自動排班中' : '移除自動排班中'}</p>
+                <Ellipsis className='ellipsis h-4 w-4 self-end' />
+              </div>
+              <ProgressBar uploadProgress={uploadProgress} />
+            </div>
+          ) : (
+            <Calendar
+              views={['month']}
+              selectable={
+                isOpenSchedule || user?.role === 'admin' || user?.role === 'super-admin'
+              }
+              localizer={localizer}
+              formats={{
+                dateFormat: 'MM/DD',
+                dayFormat: (date, culture) =>
+                  localizer.format(date, 'MM月DD日 ddd', culture),
 
-              weekdayFormat: (date, culture) => localizer.format(date, 'ddd', culture),
+                weekdayFormat: (date, culture) => localizer.format(date, 'ddd', culture),
 
-              monthHeaderFormat: (date, culture) =>
-                localizer.format(date, 'YYYY年 MM月', culture),
+                monthHeaderFormat: (date, culture) =>
+                  localizer.format(date, 'YYYY年 MM月', culture),
 
-              dayRangeHeaderFormat: ({ start, end }, culture) =>
-                `${localizer.format(start, 'MM月DD日', culture)} - ${localizer.format(
-                  end,
-                  'MM月DD日',
-                  culture,
-                )}`,
-              dayHeaderFormat: (date, cluster) =>
-                localizer.format(date, 'MM月DD日 dddd', cluster),
-            }}
-            defaultDate={new Date()}
-            defaultView={view}
-            view={view}
-            date={date}
-            events={eventsData}
-            style={{ height: '80vh' }}
-            onSelectEvent={(event) => atEditShift(event)}
-            onSelectSlot={handleSelect}
-            onNavigate={onNavigate}
-            onView={(selectedView) => setView(selectedView)}
-            messages={customMessages}
-            showAllEvents={true}
-            showMultiDayTimes
-            eventPropGetter={(event) => {
-              const backgroundColor = event.title.includes('休假')
-                ? '#CC0000'
-                : '#0044BB';
-              return {
-                style: { backgroundColor },
-              };
-            }}
-          />
+                dayRangeHeaderFormat: ({ start, end }, culture) =>
+                  `${localizer.format(start, 'MM月DD日', culture)} - ${localizer.format(
+                    end,
+                    'MM月DD日',
+                    culture,
+                  )}`,
+                dayHeaderFormat: (date, cluster) =>
+                  localizer.format(date, 'MM月DD日 dddd', cluster),
+              }}
+              defaultDate={new Date()}
+              defaultView={view}
+              view={view}
+              date={date}
+              events={eventsData}
+              style={{ height: '80vh' }}
+              onSelectEvent={(event) => atEditShift(event)}
+              onSelectSlot={handleSelect}
+              onNavigate={onNavigate}
+              onView={(selectedView) => setView(selectedView)}
+              messages={customMessages}
+              showAllEvents={true}
+              showMultiDayTimes
+              eventPropGetter={(event) => {
+                const backgroundColor = event.title.includes('休假')
+                  ? '#CC0000'
+                  : '#0044BB';
+                return {
+                  style: { backgroundColor },
+                };
+              }}
+            />
+          )}
 
           {/* 新增排班 */}
-          <Dialog open={open} onOpenChange={setOpen}>
-            <DialogContent className='hide-scrollbar max-h-[90%] overflow-y-scroll'>
-              <DialogHeader>
-                <DialogTitle>
+          <AlertDialog open={open} onOpenChange={setOpen}>
+            <AlertDialogContent className='hide-scrollbar max-h-[90%] overflow-y-scroll'>
+              <AlertDialogHeader>
+                <AlertDialogTitle>
                   新增 {new Date(selectedDate.start).toLocaleDateString()}{' '}
                   {user?.role === 'admin' && `『${shift?.employeeName}』 `}班別
-                </DialogTitle>
-                <DialogDescription></DialogDescription>
-              </DialogHeader>
+                </AlertDialogTitle>
+                <AlertDialogDescription></AlertDialogDescription>
+              </AlertDialogHeader>
               {isLoading ? (
                 <div className='flex h-auto w-full items-center justify-center md:h-auto'>
                   <LoaderCircle className='mr-3 h-5 w-5 animate-spin' />
@@ -539,8 +703,8 @@ const PersonalSchedulePage = () => {
                           setShift((prev) => {
                             return {
                               ...prev,
-                              startDate: new Date(selectedDate.start),
-                              endDate: new Date(selectedDate.end),
+                              startDate: startOfDay(new Date(selectedDate.start)),
+                              endDate: endOfDay(new Date(selectedDate.start)),
                               isAvailable: value === 'true',
                             };
                           })
@@ -560,25 +724,29 @@ const PersonalSchedulePage = () => {
                 </div>
               )}
 
-              <DialogFooter className='gap-4 p-0'>
-                <Button type='submit' onClick={atSubmit}>
+              <AlertDialogFooter className='gap-4 p-0'>
+                <Button
+                  type='submit'
+                  onClick={atSubmit}
+                  disabled={shift.isAvailable === null}
+                >
                   送出
                 </Button>
-                <DialogClose onClick={atCancel}>取消</DialogClose>
-              </DialogFooter>
-            </DialogContent>
-          </Dialog>
+                <AlertDialogCancel onClick={atCancel}>取消</AlertDialogCancel>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
 
           {/* 修改排班 */}
-          <Dialog open={openEdit} onOpenChange={setOpenEdit}>
-            <DialogContent className='hide-scrollbar max-h-[90%] overflow-y-scroll'>
-              <DialogHeader>
-                <DialogTitle>
+          <AlertDialog open={openEdit} onOpenChange={setOpenEdit}>
+            <AlertDialogContent className='hide-scrollbar max-h-[90%] overflow-y-scroll'>
+              <AlertDialogHeader>
+                <AlertDialogTitle>
                   編輯 {new Date(editShift?.start as Date).toLocaleDateString()}{' '}
                   {user?.role === 'admin' && `『${editShift?.employeeName}』 `}班別
-                </DialogTitle>
-                <DialogDescription></DialogDescription>
-              </DialogHeader>
+                </AlertDialogTitle>
+                <AlertDialogDescription></AlertDialogDescription>
+              </AlertDialogHeader>
               {isLoading ? (
                 <div className='flex h-auto w-full items-center justify-center md:h-auto'>
                   <LoaderCircle className='mr-3 h-5 w-5 animate-spin' />
@@ -613,7 +781,7 @@ const PersonalSchedulePage = () => {
                 </div>
               )}
 
-              <DialogFooter className='relative'>
+              <AlertDialogFooter className='relative'>
                 <Button
                   variant='ghost'
                   onClick={(e) => atDeleteShift(e, editShift?._id as string)}
@@ -625,7 +793,7 @@ const PersonalSchedulePage = () => {
                   <Button type='submit' onClick={atUpdateShift}>
                     更新
                   </Button>
-                  <DialogClose
+                  <AlertDialogCancel
                     onClick={() => {
                       setOpenEdit(false);
                       setTimeout(() => {
@@ -634,11 +802,11 @@ const PersonalSchedulePage = () => {
                     }}
                   >
                     取消
-                  </DialogClose>
+                  </AlertDialogCancel>
                 </div>
-              </DialogFooter>
-            </DialogContent>
-          </Dialog>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
         </div>
       </div>
     </div>

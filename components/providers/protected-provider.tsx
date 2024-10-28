@@ -16,7 +16,6 @@ const ProtectedProvider = ({ children }: { children: React.ReactNode }) => {
     setCpnyName,
     setIsCompleteProfile,
     setIsChangePassword,
-    setIsInitialized,
   } = useStore((state) => {
     return {
       user: state.user,
@@ -27,7 +26,6 @@ const ProtectedProvider = ({ children }: { children: React.ReactNode }) => {
       setCpnyName: state.setCpnyName,
       setIsCompleteProfile: state.setIsCompleteProfile,
       setIsChangePassword: state.setIsChangePassword,
-      setIsInitialized: state.setIsInitialized,
     };
   });
 

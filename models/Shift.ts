@@ -1,6 +1,16 @@
 // models/Shift.js
 import mongoose from 'mongoose';
 
+export interface ShiftType {
+  startDate: Date;
+  endDate: Date;
+  isAvailable: boolean;
+  employee: string;
+  scheduleType: 'manual' | 'automatic';
+  month: number;
+  company: string;
+}
+
 const ShiftSchema = new mongoose.Schema({
   startDate: {
     type: Date,
@@ -27,6 +37,11 @@ const ShiftSchema = new mongoose.Schema({
   },
   month: {
     type: Number,
+    required: true,
+  },
+  company: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Company',
     required: true,
   },
 });
