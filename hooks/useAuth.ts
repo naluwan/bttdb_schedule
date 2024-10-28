@@ -10,8 +10,9 @@ const useAuth = () => {
   const router = useRouter();
   const pathName = usePathname();
 
-  const { setUser } = useStore((state) => ({
+  const { setUser, setIsInitialized } = useStore((state) => ({
     setUser: state.setUser,
+    setIsInitialized: state.setIsInitialized,
   }));
 
   useEffect(() => {
@@ -35,12 +36,15 @@ const useAuth = () => {
             router.push('/sign-in');
           }
         })
+        .finally(() => {
+          setIsInitialized(true);
+        })
         .catch(() => {
           Cookies.remove('BTTDB_JWT_TOKEN');
           router.push('/sign-in');
         });
     }
-  }, [setUser, router, pathName]);
+  }, []);
 };
 
 export default useAuth;

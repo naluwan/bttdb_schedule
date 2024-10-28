@@ -22,12 +22,14 @@ export type State = {
   currentTab: string;
   isCompleteProfile: boolean;
   isChangePassword: boolean;
+  isInitialized: boolean;
   setUser: (user: UserType) => void;
   setIsLoading: (isLoading: boolean) => void;
   setCurrentTab: (tab: string) => void;
   setIsOpenSchedule: (isOpenSchedule: boolean) => void;
   setIsCompleteProfile: (isCompleteProfile: boolean) => void;
   setIsChangePassword: (isChangePassword: boolean) => void;
+  setIsInitialized: (isInitialized: boolean) => void;
   onLogout: () => void;
 };
 

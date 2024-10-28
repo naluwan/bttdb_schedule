@@ -5,17 +5,23 @@ import { useRouter } from 'next/navigation';
 
 const ProtectedProvider = ({ children }: { children: React.ReactNode }) => {
   const router = useRouter();
-  const { user } = useStore((state) => {
+  const { user, isInitialized, setIsInitialized } = useStore((state) => {
     return {
       user: state.user,
+      isInitialized: state.isInitialized,
+      setIsInitialized: state.setIsInitialized,
     };
   });
 
   useLayoutEffect(() => {
     if (!user) {
       router.push('/sign-in');
+      return;
     }
-  }, [user, router]);
+    if (isInitialized && user) {
+      router.push('/schedule');
+    }
+  }, [user, router, isInitialized]);
 
   return children;
 };

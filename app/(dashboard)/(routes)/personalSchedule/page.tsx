@@ -255,7 +255,10 @@ const PersonalSchedulePage = () => {
     return response.json();
   };
 
-  const { data: employeeData } = useSWR(['/api/employee', token], getAllEmployeeData);
+  const { data: employeeData, isLoading: employeeDataLoading } = useSWR(
+    ['/api/employee', token],
+    getAllEmployeeData,
+  );
 
   // 篩選員工排班資料
   useEffect(() => {
@@ -447,11 +450,12 @@ const PersonalSchedulePage = () => {
                 </SelectTrigger>
                 <SelectContent className='w-full'>
                   <SelectItem value='all'>全部員工</SelectItem>
-                  {employeeData?.data.map((employee: EmployeeType) => (
-                    <SelectItem key={employee._id} value={employee._id}>
-                      {employee.name}
-                    </SelectItem>
-                  ))}
+                  {!employeeDataLoading &&
+                    employeeData?.data.map((employee: EmployeeType) => (
+                      <SelectItem key={employee._id} value={employee._id}>
+                        {employee.name}
+                      </SelectItem>
+                    ))}
                 </SelectContent>
               </Select>
             </div>

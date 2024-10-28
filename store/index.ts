@@ -10,6 +10,7 @@ const initialState = {
   isOpenSchedule: false,
   isCompleteProfile: true,
   isChangePassword: true,
+  isInitialized: false,
 };
 
 const useStore = create<State>((set) => {
@@ -33,6 +34,9 @@ const useStore = create<State>((set) => {
     },
     setIsChangePassword(isCompleteProfile: boolean) {
       set({ isChangePassword: isCompleteProfile });
+    },
+    setIsInitialized(isInitialized: boolean) {
+      set({ isInitialized: isInitialized });
     },
     onLogout() {
       set({ user: null });
