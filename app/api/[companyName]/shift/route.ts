@@ -48,7 +48,13 @@ export async function GET(
         })
         .exec();
     } else {
-      shiftData = await Shift.find({ company: company._id, employee: user._id })
+      shiftData = await Shift.find({
+        company: company._id,
+        $or: [
+          { employee: user._id }, // 獲取自己的班別
+          { isAvailable: false }, // 獲取其他人休假的班別
+        ],
+      })
         .populate({
           path: 'employee',
           select: '-password',

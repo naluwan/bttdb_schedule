@@ -139,6 +139,8 @@ export async function PATCH(
         return NextResponse.json({ status: 404, message: '查無此員工' });
       }
 
+      console.log('employee', employee);
+
       if (
         String(employee.company) !== String(company._id) &&
         user.role !== 'super-admin' &&

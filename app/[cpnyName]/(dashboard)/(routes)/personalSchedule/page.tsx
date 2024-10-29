@@ -16,7 +16,7 @@ import {
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
 
-import { Ellipsis, LoaderCircle, Trash2 } from 'lucide-react';
+import { Ellipsis, Loader, LoaderCircle, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
 import useStore from '@/store';
@@ -268,7 +268,11 @@ const PersonalSchedulePage = () => {
     return response.json();
   };
 
-  const { data, mutate } = useSWR([`/api/${cpnyName}/shift`, token], getEmployeeShift);
+  const {
+    data,
+    mutate,
+    isLoading: shiftsLoading,
+  } = useSWR([`/api/${cpnyName}/shift`, token], getEmployeeShift);
 
   // 定義一個 function 來調用 API
   const getAllEmployeeData = async () => {
@@ -335,7 +339,7 @@ const PersonalSchedulePage = () => {
       });
     } else {
       const filteredShift = data?.data.filter((shiftDetail: ShiftDetailType) => {
-        return shiftDetail.employee._id === filterData;
+        return shiftDetail.employee._id === filterData || !shiftDetail.isAvailable;
       });
       setEventsData(
         filteredShift?.map((filteredShiftDetail: ShiftDetailType) => {
@@ -361,15 +365,18 @@ const PersonalSchedulePage = () => {
         }),
       );
 
+      const filteredShiftEmployeeName =
+        filteredShift &&
+        filteredShift.length > 0 &&
+        filteredShift.find(
+          (shiftDetail: ShiftDetailType) => shiftDetail.employee._id === filterData,
+        )?.employee.name;
+
       setShift((prev) => {
         return {
           ...prev,
           employee: filterData,
-          employeeName:
-            filteredShift[0]?.employee.name ||
-            employeeData?.data.find(
-              (employee: EmployeeType) => employee._id === filterData,
-            )?.name,
+          employeeName: filteredShiftEmployeeName,
         };
       });
     }
@@ -418,17 +425,27 @@ const PersonalSchedulePage = () => {
       }
 
       if (isOpenSchedule || user?.role === 'admin' || user?.role === 'super-admin') {
-        setOpenEdit(true);
-        const selectedEmployeeEvent = eventsData.find(
-          (e) => e.employee === event.employee && e.start === event.start,
-        );
+        if (
+          event.employee !== user?._id &&
+          user?.role !== 'admin' &&
+          user?.role !== 'super-admin'
+        ) {
+          toast('無法編輯其他員工的班別', { icon: '🚫' });
+        } else {
+          setOpenEdit(true);
+          const selectedEmployeeEvent = eventsData.find(
+            (e) => e.employee === event.employee && e.start === event.start,
+          );
 
-        if (selectedEmployeeEvent) {
-          selectedEmployeeEvent.start = startOfDay(new Date(selectedEmployeeEvent.start));
-          selectedEmployeeEvent.end = endOfDay(new Date(selectedEmployeeEvent.start));
+          if (selectedEmployeeEvent) {
+            selectedEmployeeEvent.start = startOfDay(
+              new Date(selectedEmployeeEvent.start),
+            );
+            selectedEmployeeEvent.end = endOfDay(new Date(selectedEmployeeEvent.start));
+          }
+
+          setEditShift(selectedEmployeeEvent as EditShiftType);
         }
-
-        setEditShift(selectedEmployeeEvent as EditShiftType);
       } else {
         toast('已關閉排班', { icon: '🚫' });
       }
@@ -461,7 +478,16 @@ const PersonalSchedulePage = () => {
       // 取消Loading狀態
       setIsLoading(false);
     },
-    [editShift, token, mutate, setIsLoading, setEventsData, setOpenEdit, setEditShift],
+    [
+      editShift,
+      token,
+      mutate,
+      setIsLoading,
+      setEventsData,
+      setOpenEdit,
+      setEditShift,
+      cpnyName,
+    ],
   );
 
   // 刪除排班
@@ -621,14 +647,24 @@ const PersonalSchedulePage = () => {
             </div>
           )}
 
-          {autoScheduleLoading || deleteAutoScheduleLoading ? (
-            <div className='h-full w-full'>
-              <div className='flex h-auto w-full'>
-                <p>{autoScheduleLoading ? '自動排班中' : '移除自動排班中'}</p>
-                <Ellipsis className='ellipsis h-4 w-4 self-end' />
+          {shiftsLoading || autoScheduleLoading || deleteAutoScheduleLoading ? (
+            shiftsLoading ? (
+              <div className='flex h-full w-full items-center justify-center'>
+                <p className='mr-2 text-xl'>獲取資料中</p>
+                <Loader className='h-6 w-6 animate-spin' />
               </div>
-              <ProgressBar uploadProgress={uploadProgress} />
-            </div>
+            ) : (
+              autoScheduleLoading ||
+              (deleteAutoScheduleLoading && (
+                <div className='h-full w-full'>
+                  <div className='flex h-auto w-full'>
+                    <p>{autoScheduleLoading ? '自動排班中' : '移除自動排班中'}</p>
+                    <Ellipsis className='ellipsis h-4 w-4 self-end' />
+                  </div>
+                  <ProgressBar uploadProgress={uploadProgress} />
+                </div>
+              ))
+            )
           ) : (
             <Calendar
               views={['month']}
@@ -640,20 +676,17 @@ const PersonalSchedulePage = () => {
                 dateFormat: 'MM/DD',
                 dayFormat: (date, culture) =>
                   localizer.format(date, 'MM月DD日 ddd', culture),
-
                 weekdayFormat: (date, culture) => localizer.format(date, 'ddd', culture),
-
                 monthHeaderFormat: (date, culture) =>
                   localizer.format(date, 'YYYY年 MM月', culture),
-
                 dayRangeHeaderFormat: ({ start, end }, culture) =>
                   `${localizer.format(start, 'MM月DD日', culture)} - ${localizer.format(
                     end,
                     'MM月DD日',
                     culture,
                   )}`,
-                dayHeaderFormat: (date, cluster) =>
-                  localizer.format(date, 'MM月DD日 dddd', cluster),
+                dayHeaderFormat: (date, culture) =>
+                  localizer.format(date, 'MM月DD日 dddd', culture),
               }}
               defaultDate={new Date()}
               defaultView={view}
@@ -661,20 +694,18 @@ const PersonalSchedulePage = () => {
               date={date}
               events={eventsData}
               style={{ height: '80vh' }}
-              onSelectEvent={(event) => atEditShift(event)}
+              onSelectEvent={atEditShift}
               onSelectSlot={handleSelect}
               onNavigate={onNavigate}
-              onView={(selectedView) => setView(selectedView)}
+              onView={setView}
               messages={customMessages}
-              showAllEvents={true}
+              showAllEvents
               showMultiDayTimes
               eventPropGetter={(event) => {
                 const backgroundColor = event.title.includes('休假')
                   ? '#CC0000'
                   : '#0044BB';
-                return {
-                  style: { backgroundColor },
-                };
+                return { style: { backgroundColor } };
               }}
             />
           )}
@@ -725,14 +756,18 @@ const PersonalSchedulePage = () => {
               )}
 
               <AlertDialogFooter className='gap-4 p-0'>
-                <Button
-                  type='submit'
-                  onClick={atSubmit}
-                  disabled={shift.isAvailable === null}
-                >
-                  送出
-                </Button>
-                <AlertDialogCancel onClick={atCancel}>取消</AlertDialogCancel>
+                <div className='flex items-center justify-end gap-4 p-0'>
+                  <Button
+                    type='submit'
+                    onClick={atSubmit}
+                    disabled={shift.isAvailable === null}
+                  >
+                    送出
+                  </Button>
+                  <AlertDialogCancel onClick={atCancel} className='m-0'>
+                    取消
+                  </AlertDialogCancel>
+                </div>
               </AlertDialogFooter>
             </AlertDialogContent>
           </AlertDialog>
@@ -743,7 +778,9 @@ const PersonalSchedulePage = () => {
               <AlertDialogHeader>
                 <AlertDialogTitle>
                   編輯 {new Date(editShift?.start as Date).toLocaleDateString()}{' '}
-                  {user?.role === 'admin' && `『${editShift?.employeeName}』 `}班別
+                  {(user?.role === 'admin' || user?.role === 'super-admin') &&
+                    `『${editShift?.employeeName}』 `}
+                  班別
                 </AlertDialogTitle>
                 <AlertDialogDescription></AlertDialogDescription>
               </AlertDialogHeader>
@@ -790,7 +827,7 @@ const PersonalSchedulePage = () => {
                   <Trash2 className='h-6 w-6 text-red-500' />
                 </Button>
                 <div className='flex items-center justify-end gap-4 p-0'>
-                  <Button type='submit' onClick={atUpdateShift}>
+                  <Button type='submit' className='' onClick={atUpdateShift}>
                     更新
                   </Button>
                   <AlertDialogCancel
@@ -800,6 +837,7 @@ const PersonalSchedulePage = () => {
                         setEditShift(null);
                       }, 100);
                     }}
+                    className='m-0'
                   >
                     取消
                   </AlertDialogCancel>

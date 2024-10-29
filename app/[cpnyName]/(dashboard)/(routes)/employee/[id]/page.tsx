@@ -102,6 +102,7 @@ const EmployeeDetailPage = () => {
     };
   });
 
+  console.log('user id', id);
   // 定義一個 function 來調用 API
   const getEmployeeData = async () => {
     if (!token) {
@@ -131,6 +132,8 @@ const EmployeeDetailPage = () => {
     [`/api/${cpnyName}/employee/${id}`, token],
     getEmployeeData,
   );
+
+  console.log('data', data);
 
   useEffect(() => {
     if (data) {
@@ -170,8 +173,14 @@ const EmployeeDetailPage = () => {
         setIsChangePassword(true);
       }
     };
-    checkProfile();
-  }, [employeeData]);
+    if (
+      employeeData?._id === id &&
+      user?.role !== 'admin' &&
+      user?.role !== 'super-admin'
+    ) {
+      checkProfile();
+    }
+  }, [employeeData, setIsChangePassword, setIsCompleteProfile, id, user]);
 
   // 更新員工資訊
   const updateEmployeeDetail = useCallback(
@@ -234,9 +243,10 @@ const EmployeeDetailPage = () => {
       setIsLoading(false);
       setIsEdit(false);
     },
-    [updateEmployee, setIsLoading, token, mutate, id],
+    [updateEmployee, setIsLoading, token, mutate, id, cpnyName],
   );
 
+  // 更新生日
   const updateBirthday = useCallback((e: Date | undefined) => {
     setUpdateEmployee((prev) => {
       return {
@@ -246,6 +256,7 @@ const EmployeeDetailPage = () => {
     });
   }, []);
 
+  // 更新到職日期
   const updateDateEmployed = useCallback((e: Date | undefined) => {
     setUpdateEmployee((prev) => {
       return {
@@ -258,6 +269,7 @@ const EmployeeDetailPage = () => {
   const currentYear = new Date().getFullYear();
   const years = Array.from({ length: 80 }, (_, i) => currentYear - i);
 
+  // 顯示職位
   const switchRole = useCallback((role: string) => {
     switch (role) {
       case 'super-admin':
@@ -436,14 +448,12 @@ const EmployeeDetailPage = () => {
                   />
                 </div>
                 <div>
-                  <Label
-                    className='whitespace-nowrap text-xl font-bold text-gray-700 md:text-2xl'
-                    htmlFor='birthday'
-                  >
+                  <Label className='whitespace-nowrap text-xl font-bold text-gray-700 md:text-2xl'>
                     生日:
                   </Label>
                   <span
                     className={cn('ml-2 break-words text-gray-900', isEdit && 'hidden')}
+                    id='birthday'
                   >
                     {employeeData?.birthday
                       ? new Date(employeeData?.birthday as Date).toLocaleDateString()
@@ -460,10 +470,7 @@ const EmployeeDetailPage = () => {
                   />
                 </div>
                 <div>
-                  <Label
-                    className='whitespace-nowrap text-xl font-bold text-gray-700 md:text-2xl'
-                    htmlFor='dateEmployed'
-                  >
+                  <Label className='whitespace-nowrap text-xl font-bold text-gray-700 md:text-2xl'>
                     到職日期:
                   </Label>
                   <span
@@ -513,7 +520,6 @@ const EmployeeDetailPage = () => {
                       'whitespace-nowrap text-xl font-bold text-gray-700 md:text-2xl',
                       isEdit && user?.role !== 'admin' && 'hidden',
                     )}
-                    htmlFor='role'
                   >
                     職位:
                   </Label>
