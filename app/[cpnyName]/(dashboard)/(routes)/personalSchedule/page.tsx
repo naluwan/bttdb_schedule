@@ -329,8 +329,12 @@ const PersonalSchedulePage = () => {
       setEventsData(
         data?.data?.map((shiftDetail: ShiftDetailType) => {
           return {
-            start: moment(shiftDetail.startDate),
-            end: moment(shiftDetail.endDate),
+            start: new Date(shiftDetail.startDate),
+            end: new Date(
+              new Date(shiftDetail.endDate).setHours(
+                new Date(shiftDetail.endDate).getHours() - 8,
+              ),
+            ),
             title: `${shiftDetail.employee.name} ${
               shiftDetail.isAvailable ? '上班' : '休假'
             }`,
@@ -356,8 +360,12 @@ const PersonalSchedulePage = () => {
       setEventsData(
         filteredShift?.map((filteredShiftDetail: ShiftDetailType) => {
           return {
-            start: moment(filteredShiftDetail.startDate),
-            end: moment(filteredShiftDetail.endDate),
+            start: new Date(filteredShiftDetail.startDate),
+            end: new Date(
+              new Date(filteredShiftDetail.endDate).setHours(
+                new Date(filteredShiftDetail.endDate).getHours() - 8,
+              ),
+            ),
             title: `${filteredShiftDetail.employee.name} ${
               filteredShiftDetail.isAvailable ? '上班' : '休假'
             }`,
@@ -652,16 +660,6 @@ const PersonalSchedulePage = () => {
     },
     [date, token, cpnyName, mutate, setIsCompleteLoading],
   );
-
-  useEffect(() => {
-    if (eventsData) {
-      console.log('eventsData', eventsData);
-    }
-
-    if (data) {
-      console.log('data', data.data);
-    }
-  }, [eventsData, data]);
 
   return (
     <div className='p-6'>
