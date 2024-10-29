@@ -107,7 +107,8 @@ const ChangePassBtn = ({ isEdit, user, employee, mutate }: ChangePassBtnType) =>
         <DialogHeader>
           <DialogTitle>修改密碼</DialogTitle>
           <DialogDescription>
-            {user?.role === 'admin' && user._id !== employee?._id
+            {(user?.role === 'admin' || user?.role === 'super-admin') &&
+            user._id !== employee?._id
               ? '請輸入新密碼與確認新密碼'
               : '請填入舊密碼、新密碼與確認新密碼'}
           </DialogDescription>
@@ -123,7 +124,9 @@ const ChangePassBtn = ({ isEdit, user, employee, mutate }: ChangePassBtnType) =>
             <div
               className={cn(
                 'block',
-                user?.role === 'admin' && user._id !== employee?._id && 'hidden',
+                (user?.role === 'admin' || user?.role === 'super-admin') &&
+                  user._id !== employee?._id &&
+                  'hidden',
               )}
             >
               <Label htmlFor='oldPass'>
