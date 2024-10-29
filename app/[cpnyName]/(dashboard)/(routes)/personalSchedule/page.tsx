@@ -645,8 +645,16 @@ const PersonalSchedulePage = () => {
     [date, token, cpnyName, mutate, setIsCompleteLoading],
   );
 
-  console.log('data', data.data);
-  console.log('eventsData', eventsData);
+  useEffect(() => {
+    if (eventsData) {
+      console.log('eventsData', eventsData);
+    }
+
+    if (data) {
+      console.log('data', data.data);
+    }
+  }, [eventsData, data]);
+
   return (
     <div className='p-6'>
       <div className='flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between'>
