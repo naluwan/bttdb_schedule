@@ -644,7 +644,7 @@ const PersonalSchedulePage = () => {
     },
     [date, token, cpnyName, mutate, setIsCompleteLoading],
   );
-
+  console.log('eventsData', eventsData);
   return (
     <div className='p-6'>
       <div className='flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between'>
