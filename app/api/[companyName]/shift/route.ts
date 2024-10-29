@@ -39,7 +39,7 @@ export async function GET(
     }
 
     let shiftData;
-    const timeZone = 'Asia/Taipei';
+    // const timeZone = 'Asia/Taipei';
 
     if (user.role === 'admin' || user.role === 'super-admin') {
       shiftData = await Shift.find({ company: company._id })
@@ -64,13 +64,13 @@ export async function GET(
     }
 
     // 將 shiftData 中的 startDate 和 endDate 轉換為台北時間
-    const localizedShiftData = shiftData.map((shift) => ({
-      ...shift.toObject(),
-      startDate: toZonedTime(shift.startDate, timeZone),
-      endDate: toZonedTime(shift.endDate, timeZone),
-    }));
+    // const localizedShiftData = shiftData.map((shift) => ({
+    //   ...shift.toObject(),
+    //   startDate: toZonedTime(shift.startDate, timeZone),
+    //   endDate: toZonedTime(shift.endDate, timeZone),
+    // }));
 
-    return NextResponse.json({ status: 200, data: localizedShiftData });
+    return NextResponse.json({ status: 200, data: shiftData });
   } catch (error) {
     if (error instanceof Error) {
       console.error('[SHIFT GET]', error.message);

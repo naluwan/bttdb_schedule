@@ -73,12 +73,12 @@ const PersonalSchedulePage = () => {
     end: new Date(),
   });
   const [shift, setShift] = useState<ShiftType>({
-    startDate: toZonedTime(startOfDay(new Date()), timeZone),
-    endDate: toZonedTime(endOfDay(new Date()), timeZone),
+    startDate: startOfDay(toZonedTime(new Date(), timeZone)),
+    endDate: endOfDay(toZonedTime(new Date(), timeZone)),
     isAvailable: null,
     employee: '',
     employeeName: '',
-    month: new Date().getMonth() + 1,
+    month: toZonedTime(new Date(), timeZone).getMonth() + 1,
   });
   const [filterData, setFilterData] = useState('all');
   const [editShift, setEditShift] = useState<EditShiftType | null>(null);
@@ -246,12 +246,12 @@ const PersonalSchedulePage = () => {
     setOpen(false);
     setTimeout(() => {
       setSelectedDate({
-        start: toZonedTime(startOfDay(new Date()), timeZone),
-        end: toZonedTime(endOfDay(new Date()), timeZone),
+        start: startOfDay(toZonedTime(new Date(), timeZone)),
+        end: endOfDay(toZonedTime(new Date(), timeZone)),
       });
       setShift({
-        startDate: toZonedTime(startOfDay(new Date()), timeZone),
-        endDate: toZonedTime(endOfDay(new Date()), timeZone),
+        startDate: startOfDay(toZonedTime(new Date(), timeZone)),
+        endDate: endOfDay(toZonedTime(new Date(), timeZone)),
         isAvailable: null,
         employee: user?._id as string,
         employeeName: '',
@@ -742,8 +742,7 @@ const PersonalSchedulePage = () => {
                 <Loader className='h-6 w-6 animate-spin' />
               </div>
             ) : (
-              autoScheduleLoading ||
-              (deleteAutoScheduleLoading && (
+              (autoScheduleLoading || deleteAutoScheduleLoading) && (
                 <div className='h-full w-full'>
                   <div className='flex h-auto w-full'>
                     <p>{autoScheduleLoading ? '自動排班中' : '移除自動排班中'}</p>
@@ -751,7 +750,7 @@ const PersonalSchedulePage = () => {
                   </div>
                   <ProgressBar uploadProgress={uploadProgress} />
                 </div>
-              ))
+              )
             )
           ) : (
             <Calendar
@@ -822,9 +821,8 @@ const PersonalSchedulePage = () => {
                           setShift((prev) => {
                             return {
                               ...prev,
-                              startDate: toZonedTime(
-                                startOfDay(new Date(selectedDate.start)),
-                                timeZone,
+                              startDate: startOfDay(
+                                toZonedTime(new Date(selectedDate.start), timeZone),
                               ),
                               endDate: toZonedTime(
                                 endOfDay(new Date(selectedDate.start)),
