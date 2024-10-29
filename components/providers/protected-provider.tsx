@@ -32,7 +32,8 @@ const ProtectedProvider = ({ children }: { children: React.ReactNode }) => {
   useEffect(() => {
     const checkProfileAndPassword = async () => {
       if (!user) {
-        router.push(`/${cpnyName}/sign-in`);
+        // router.push(`/${cpnyName}/sign-in`);
+        router.push(pathName);
         return;
       }
       // 比對是否修改預設密碼
@@ -54,7 +55,7 @@ const ProtectedProvider = ({ children }: { children: React.ReactNode }) => {
       }
     };
     checkProfileAndPassword();
-  }, [user]);
+  }, [user, cpnyName, setIsCompleteProfile, setIsChangePassword, router, pathName]);
 
   useEffect(() => {
     // 嘗試從 localStorage 獲取 cpnyName
@@ -64,7 +65,8 @@ const ProtectedProvider = ({ children }: { children: React.ReactNode }) => {
     }
 
     if (!user) {
-      router.push(`/${cpnyName}/sign-in`);
+      router.push(pathName);
+      // router.push(`/${cpnyName}/sign-in`);
       return;
     }
 
@@ -75,7 +77,16 @@ const ProtectedProvider = ({ children }: { children: React.ReactNode }) => {
         router.push(pathName);
       }
     }
-  }, [user, isInitialized, isCompleteProfile, isChangePassword, cpnyName]);
+  }, [
+    user,
+    isInitialized,
+    isCompleteProfile,
+    isChangePassword,
+    cpnyName,
+    pathName,
+    router,
+    setCpnyName,
+  ]);
 
   return children;
 };
