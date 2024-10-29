@@ -102,7 +102,6 @@ const EmployeeDetailPage = () => {
     };
   });
 
-  console.log('user id', id);
   // 定義一個 function 來調用 API
   const getEmployeeData = async () => {
     if (!token) {
@@ -132,8 +131,6 @@ const EmployeeDetailPage = () => {
     [`/api/${cpnyName}/employee/${id}`, token],
     getEmployeeData,
   );
-
-  console.log('data', data);
 
   useEffect(() => {
     if (data) {

@@ -35,7 +35,6 @@ import useSWR from 'swr';
 import { EditShiftType, EventType, ShiftDetailType } from '@/type';
 import { EmployeeType } from '@/models/Employee';
 import ProgressBar from '@/components/progressBar';
-import { formatInTimeZone } from 'date-fns-tz';
 
 moment.locale('zh-tw');
 
@@ -101,10 +100,12 @@ const PersonalSchedulePage = () => {
 
   // 修改導航按鈕文字
   useEffect(() => {
-    setCustomMessages({
-      ...customMessages,
-      previous: view === 'month' ? '上個月' : view === 'day' ? '前一日' : '上一個',
-      next: view === 'month' ? '下個月' : view === 'day' ? '後一日' : '下一個',
+    setCustomMessages((prev) => {
+      return {
+        ...prev,
+        previous: view === 'month' ? '上個月' : view === 'day' ? '前一日' : '上一個',
+        next: view === 'month' ? '下個月' : view === 'day' ? '後一日' : '下一個',
+      };
     });
   }, [view]);
 
@@ -194,7 +195,7 @@ const PersonalSchedulePage = () => {
           return { ...prev, month: start.getMonth() + 1 };
         });
       } else if (isSelected) {
-        if (user?.role === 'admin') {
+        if (user?.role === 'admin' || user?.role === 'super-admin') {
           toast(
             `${
               filterData === 'all' ? '你' : `『${shift?.employeeName}』 `
@@ -310,16 +311,8 @@ const PersonalSchedulePage = () => {
       setEventsData(
         data?.data?.map((shiftDetail: ShiftDetailType) => {
           return {
-            start: formatInTimeZone(
-              shiftDetail.startDate,
-              'Asia/Taipei',
-              'yyyy-MM-dd HH:mm:ssXXX',
-            ),
-            end: formatInTimeZone(
-              shiftDetail.endDate,
-              'Asia/Taipei',
-              'yyyy-MM-dd HH:mm:ssXXX',
-            ),
+            start: new Date(shiftDetail.startDate),
+            end: new Date(shiftDetail.endDate),
             title: `${shiftDetail.employee.name} ${
               shiftDetail.isAvailable ? '上班' : '休假'
             }`,
@@ -344,16 +337,8 @@ const PersonalSchedulePage = () => {
       setEventsData(
         filteredShift?.map((filteredShiftDetail: ShiftDetailType) => {
           return {
-            start: formatInTimeZone(
-              filteredShiftDetail.startDate,
-              'Asia/Taipei',
-              'yyyy-MM-dd HH:mm:ssXXX',
-            ),
-            end: formatInTimeZone(
-              filteredShiftDetail.endDate,
-              'Asia/Taipei',
-              'yyyy-MM-dd HH:mm:ssXXX',
-            ),
+            start: new Date(filteredShiftDetail.startDate),
+            end: new Date(filteredShiftDetail.endDate),
             title: `${filteredShiftDetail.employee.name} ${
               filteredShiftDetail.isAvailable ? '上班' : '休假'
             }`,
@@ -516,6 +501,8 @@ const PersonalSchedulePage = () => {
       // 取消Loading狀態
       setIsLoading(false);
     },
+    //TODO: 這裡的依賴項目有問題，需要重新檢查
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [editShift, token, mutate, setOpenEdit, setEditShift, setIsLoading, cpnyName],
   );
 
@@ -667,10 +654,8 @@ const PersonalSchedulePage = () => {
             )
           ) : (
             <Calendar
-              views={['month']}
-              selectable={
-                isOpenSchedule || user?.role === 'admin' || user?.role === 'super-admin'
-              }
+              views={['day', 'month']}
+              selectable
               localizer={localizer}
               formats={{
                 dateFormat: 'MM/DD',
