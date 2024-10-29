@@ -3,7 +3,7 @@ import connect from '@/lib/mongodb';
 import { authenticateToken, checkAdminAndSuperAdmin } from '@/lib/authMiddleware';
 import Shift from '@/models/Shift';
 import Company from '@/models/Company';
-import { toZonedTime } from 'date-fns-tz';
+
 connect();
 
 export async function GET(
@@ -36,8 +36,6 @@ export async function GET(
       });
     }
 
-    const timeZone = 'Asia/Taipei';
-
     const shiftData = await Shift.find({ company: company._id, isComplete: true })
       .populate({
         path: 'employee',
@@ -46,13 +44,13 @@ export async function GET(
       .exec();
 
     // 將 shiftData 中的 startDate 和 endDate 轉換為台北時間
-    const localizedShiftData = shiftData.map((shift) => ({
-      ...shift.toObject(),
-      startDate: toZonedTime(shift.startDate, timeZone),
-      endDate: toZonedTime(shift.endDate, timeZone),
-    }));
+    // const localizedShiftData = shiftData.map((shift) => ({
+    //   ...shift.toObject(),
+    //   startDate: toZonedTime(shift.startDate, timeZone),
+    //   endDate: toZonedTime(shift.endDate, timeZone),
+    // }));
 
-    return NextResponse.json({ status: 200, data: localizedShiftData });
+    return NextResponse.json({ status: 200, data: shiftData });
   } catch (error) {
     if (error instanceof Error) {
       console.error('[SHIFT GET]', error.message);
