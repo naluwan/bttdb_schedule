@@ -171,7 +171,11 @@ const EmployeeDetailPage = () => {
       }
     };
 
-    if (employeeData?._id === id) {
+    if (
+      employeeData?._id === id &&
+      user?.role !== 'admin' &&
+      user?.role !== 'super-admin'
+    ) {
       checkProfile();
     }
   }, [employeeData, setIsChangePassword, setIsCompleteProfile, id, user]);
@@ -513,7 +517,10 @@ const EmployeeDetailPage = () => {
                   <Label
                     className={cn(
                       'whitespace-nowrap text-xl font-bold text-gray-700 md:text-2xl',
-                      isEdit && user?.role !== 'admin' && 'hidden',
+                      isEdit &&
+                        user?.role !== 'admin' &&
+                        user?.role !== 'super-admin' &&
+                        'hidden',
                     )}
                   >
                     職位:
@@ -522,7 +529,12 @@ const EmployeeDetailPage = () => {
                     {switchRole(employeeData?.role as string)}
                   </span>
                   <RadioGroup
-                    className={cn('hidden', isEdit && user?.role === 'admin' && 'flex')}
+                    className={cn(
+                      'hidden',
+                      isEdit &&
+                        (user?.role === 'admin' || user?.role === 'super-admin') &&
+                        'flex',
+                    )}
                     id='role'
                     onValueChange={(e) => updateEmployeeDetail(e)}
                     value={updateEmployee?.role}
