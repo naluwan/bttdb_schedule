@@ -321,8 +321,8 @@ const PersonalSchedulePage = () => {
       setEventsData(
         data?.data?.map((shiftDetail: ShiftDetailType) => {
           return {
-            start: toZonedTime(new Date(shiftDetail.startDate), timeZone),
-            end: toZonedTime(new Date(shiftDetail.endDate), timeZone),
+            start: toZonedTime(shiftDetail.startDate, timeZone),
+            end: toZonedTime(shiftDetail.endDate, timeZone),
             title: `${shiftDetail.employee.name} ${
               shiftDetail.isAvailable ? '上班' : '休假'
             }`,
@@ -348,8 +348,8 @@ const PersonalSchedulePage = () => {
       setEventsData(
         filteredShift?.map((filteredShiftDetail: ShiftDetailType) => {
           return {
-            start: toZonedTime(new Date(filteredShiftDetail.startDate), timeZone),
-            end: toZonedTime(new Date(filteredShiftDetail.endDate), timeZone),
+            start: toZonedTime(filteredShiftDetail.startDate, timeZone),
+            end: toZonedTime(filteredShiftDetail.endDate, timeZone),
             title: `${filteredShiftDetail.employee.name} ${
               filteredShiftDetail.isAvailable ? '上班' : '休假'
             }`,
@@ -644,6 +644,8 @@ const PersonalSchedulePage = () => {
     },
     [date, token, cpnyName, mutate, setIsCompleteLoading],
   );
+
+  console.log('data', data.data);
   console.log('eventsData', eventsData);
   return (
     <div className='p-6'>
