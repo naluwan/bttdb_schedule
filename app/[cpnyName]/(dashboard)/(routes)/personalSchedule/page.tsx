@@ -35,9 +35,10 @@ import useSWR from 'swr';
 import { EditShiftType, EventType, ShiftDetailType } from '@/type';
 import { EmployeeType } from '@/models/Employee';
 import ProgressBar from '@/components/progressBar';
+import { toZonedTime } from 'date-fns-tz';
 
 moment.locale('zh-tw');
-
+const timeZone = 'Asia/Taipei';
 interface ShiftType {
   startDate: Date;
   endDate: Date;
@@ -72,8 +73,8 @@ const PersonalSchedulePage = () => {
     end: new Date(),
   });
   const [shift, setShift] = useState<ShiftType>({
-    startDate: startOfDay(new Date()),
-    endDate: endOfDay(new Date()),
+    startDate: toZonedTime(startOfDay(new Date()), timeZone),
+    endDate: toZonedTime(endOfDay(new Date()), timeZone),
     isAvailable: null,
     employee: '',
     employeeName: '',
@@ -195,10 +196,16 @@ const PersonalSchedulePage = () => {
         (user?.role === 'admin' && !isSelected) ||
         (user?.role === 'super-admin' && !isSelected)
       ) {
-        setSelectedDate({ start, end });
+        setSelectedDate({
+          start: toZonedTime(start, timeZone),
+          end: toZonedTime(end, timeZone),
+        });
         setOpen(true);
         setShift((prev) => {
-          return { ...prev, month: start.getMonth() + 1 };
+          return {
+            ...prev,
+            month: toZonedTime(start, timeZone).getMonth() + 1,
+          };
         });
       } else if (isSelected) {
         if (user?.role === 'admin' || user?.role === 'super-admin') {
@@ -223,9 +230,12 @@ const PersonalSchedulePage = () => {
   // 月份導航事件
   const onNavigate = useCallback(
     (newDate: Date) => {
-      setDate(newDate);
+      setDate(toZonedTime(newDate, timeZone));
       setShift((prev) => {
-        return { ...prev, month: newDate.getMonth() + 1 };
+        return {
+          ...prev,
+          month: toZonedTime(newDate, timeZone).getMonth() + 1,
+        };
       });
     },
     [setDate, setShift],
@@ -236,16 +246,16 @@ const PersonalSchedulePage = () => {
     setOpen(false);
     setTimeout(() => {
       setSelectedDate({
-        start: startOfDay(new Date()),
-        end: endOfDay(new Date()),
+        start: toZonedTime(startOfDay(new Date()), timeZone),
+        end: toZonedTime(endOfDay(new Date()), timeZone),
       });
       setShift({
-        startDate: startOfDay(new Date()),
-        endDate: endOfDay(new Date()),
+        startDate: toZonedTime(startOfDay(new Date()), timeZone),
+        endDate: toZonedTime(endOfDay(new Date()), timeZone),
         isAvailable: null,
         employee: user?._id as string,
         employeeName: '',
-        month: new Date().getMonth() + 1,
+        month: toZonedTime(new Date(), timeZone).getMonth() + 1,
       });
     }, 100);
   }, [user]);
@@ -812,8 +822,14 @@ const PersonalSchedulePage = () => {
                           setShift((prev) => {
                             return {
                               ...prev,
-                              startDate: startOfDay(new Date(selectedDate.start)),
-                              endDate: endOfDay(new Date(selectedDate.start)),
+                              startDate: toZonedTime(
+                                startOfDay(new Date(selectedDate.start)),
+                                timeZone,
+                              ),
+                              endDate: toZonedTime(
+                                endOfDay(new Date(selectedDate.start)),
+                                timeZone,
+                              ),
                               isAvailable: value === 'true',
                             };
                           })
