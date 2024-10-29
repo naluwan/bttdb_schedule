@@ -11,7 +11,9 @@ import {
   parseISO,
   startOfDay,
 } from 'date-fns';
+import { toZonedTime } from 'date-fns-tz';
 
+const timeZone = 'Asia/Taipei';
 connect();
 
 // 全域變數用來追蹤進度
@@ -144,8 +146,8 @@ export async function POST(
       day.employees.forEach((employee: EmployeeType) => {
         if (employee.status === '上班') {
           newShifts.push({
-            startDate: startOfDay(day.date), // 將 start 設為當天的開始時間
-            endDate: endOfDay(day.date), // 將 end 設為當天的結束時間
+            startDate: toZonedTime(startOfDay(day.date), timeZone), // 將 start 設為當天的開始時間
+            endDate: toZonedTime(endOfDay(day.date), timeZone), // 將 end 設為當天的結束時間
             isAvailable: true, // 上班
             employee: employee.employeeId,
             scheduleType: 'automatic', // 自動生成

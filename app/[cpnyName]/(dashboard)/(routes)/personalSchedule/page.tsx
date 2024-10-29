@@ -35,9 +35,7 @@ import useSWR from 'swr';
 import { EditShiftType, EventType, ShiftDetailType } from '@/type';
 import { EmployeeType } from '@/models/Employee';
 import ProgressBar from '@/components/progressBar';
-import { toZonedTime } from 'date-fns-tz';
 
-const timeZone = 'Asia/Taipei';
 moment.locale('zh-tw');
 
 interface ShiftType {
@@ -321,8 +319,8 @@ const PersonalSchedulePage = () => {
       setEventsData(
         data?.data?.map((shiftDetail: ShiftDetailType) => {
           return {
-            start: toZonedTime(shiftDetail.startDate, timeZone),
-            end: toZonedTime(shiftDetail.endDate, timeZone),
+            start: moment(shiftDetail.startDate),
+            end: moment(shiftDetail.endDate),
             title: `${shiftDetail.employee.name} ${
               shiftDetail.isAvailable ? '上班' : '休假'
             }`,
@@ -348,8 +346,8 @@ const PersonalSchedulePage = () => {
       setEventsData(
         filteredShift?.map((filteredShiftDetail: ShiftDetailType) => {
           return {
-            start: toZonedTime(filteredShiftDetail.startDate, timeZone),
-            end: toZonedTime(filteredShiftDetail.endDate, timeZone),
+            start: moment(filteredShiftDetail.startDate),
+            end: moment(filteredShiftDetail.endDate),
             title: `${filteredShiftDetail.employee.name} ${
               filteredShiftDetail.isAvailable ? '上班' : '休假'
             }`,
