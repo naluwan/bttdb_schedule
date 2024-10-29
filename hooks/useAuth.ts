@@ -21,8 +21,8 @@ const useAuth = () => {
   useEffect(() => {
     const token = Cookies.get('BTTDB_JWT_TOKEN');
 
-    // 嘗試從 localStorage 獲取 cpnyName
-    const storedCpnyName = localStorage.getItem('EZY_SCHEDULE_CPNY_NAME');
+    // 嘗試從 Cookies 獲取 cpnyName
+    const storedCpnyName = Cookies.get('EZY_SCHEDULE_CPNY_NAME');
     if (storedCpnyName) {
       setCpnyName(storedCpnyName);
     }

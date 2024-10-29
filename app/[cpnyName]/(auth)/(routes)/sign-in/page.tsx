@@ -11,7 +11,7 @@ import bcrypt from 'bcryptjs';
 const SignInPage = () => {
   const router = useRouter();
   const { cpnyName } = useParams();
-  localStorage.setItem('EZY_SCHEDULE_CPNY_NAME', cpnyName as string);
+  Cookies.set('EZY_SCHEDULE_CPNY_NAME', cpnyName as string);
   const {
     isLoading,
     setUser,
@@ -35,6 +35,7 @@ const SignInPage = () => {
     companyName: cpnyName,
   });
 
+  // 更新帳號密碼
   const atChangeInput = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
 
@@ -46,6 +47,7 @@ const SignInPage = () => {
     });
   }, []);
 
+  // 登入
   const atSubmit = useCallback(
     async (e: React.FormEvent) => {
       e.preventDefault();

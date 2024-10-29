@@ -85,7 +85,7 @@ export const columns = (mutate?: () => void): ColumnDef<Member>[] => [
     cell: ({ row, table }) => {
       const employee = row.original;
       const token = Cookies.get('BTTDB_JWT_TOKEN');
-      const cpnyName = localStorage.getItem('EZY_SCHEDULE_CPNY_NAME');
+      const cpnyName = Cookies.get('EZY_SCHEDULE_CPNY_NAME');
       const setLock = async () => {
         try {
           const data = { _id: employee._id, isLock: employee.isLock };

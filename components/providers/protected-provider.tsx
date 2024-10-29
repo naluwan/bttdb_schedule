@@ -3,6 +3,7 @@ import useStore from '@/store';
 import React, { useEffect } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
 import bcrypt from 'bcryptjs';
+import Cookies from 'js-cookie';
 const ProtectedProvider = ({ children }: { children: React.ReactNode }) => {
   const router = useRouter();
   const pathName = usePathname();
@@ -62,8 +63,8 @@ const ProtectedProvider = ({ children }: { children: React.ReactNode }) => {
   }, [user, cpnyName, setIsCompleteProfile, setIsChangePassword, router]);
 
   useEffect(() => {
-    // 嘗試從 localStorage 獲取 cpnyName
-    const storedCpnyName = localStorage.getItem('EZY_SCHEDULE_CPNY_NAME');
+    // 嘗試從 Cookies 獲取 cpnyName
+    const storedCpnyName = Cookies.get('EZY_SCHEDULE_CPNY_NAME');
     if (storedCpnyName) {
       setCpnyName(storedCpnyName);
     }
