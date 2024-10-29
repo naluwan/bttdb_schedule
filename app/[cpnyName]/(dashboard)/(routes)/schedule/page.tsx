@@ -141,7 +141,11 @@ const SchedulePage = () => {
       data?.data?.map((shiftDetail: ShiftDetailType) => {
         return {
           start: new Date(shiftDetail.startDate),
-          end: new Date(shiftDetail.endDate),
+          end: new Date(
+            new Date(shiftDetail.endDate).setHours(
+              new Date(shiftDetail.endDate).getHours() - 8,
+            ),
+          ),
           title: `${shiftDetail.employee.name} ${
             shiftDetail.isAvailable ? '上班' : '休假'
           }`,

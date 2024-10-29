@@ -733,17 +733,28 @@ const PersonalSchedulePage = () => {
             </div>
           )}
 
-          {shiftsLoading || autoScheduleLoading || deleteAutoScheduleLoading ? (
+          {isCompleteLoading ||
+          shiftsLoading ||
+          autoScheduleLoading ||
+          deleteAutoScheduleLoading ? (
             shiftsLoading ? (
               <div className='flex h-full w-full items-center justify-center'>
                 <p className='mr-2 text-xl'>獲取資料中</p>
                 <Loader className='h-6 w-6 animate-spin' />
               </div>
             ) : (
-              (autoScheduleLoading || deleteAutoScheduleLoading) && (
+              (autoScheduleLoading || deleteAutoScheduleLoading || isCompleteLoading) && (
                 <div className='h-full w-full'>
                   <div className='flex h-auto w-full'>
-                    <p>{autoScheduleLoading ? '自動排班中' : '移除自動排班中'}</p>
+                    <p>
+                      {autoScheduleLoading
+                        ? '自動排班中'
+                        : deleteAutoScheduleLoading
+                        ? '移除自動排班中'
+                        : isCompleteLoading && isComplete
+                        ? '收回排班中'
+                        : '送出排班中'}
+                    </p>
                     <Ellipsis className='ellipsis h-4 w-4 self-end' />
                   </div>
                   <ProgressBar uploadProgress={uploadProgress} />
