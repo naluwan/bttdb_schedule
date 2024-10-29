@@ -272,6 +272,8 @@ const EmployeeDetailPage = () => {
     switch (role) {
       case 'super-admin':
         return '系統管理員';
+      case 'shareholder':
+        return '股東';
       case 'admin':
         return '管理員';
       case 'full-time':

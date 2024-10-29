@@ -9,6 +9,7 @@ export interface ShiftType {
   scheduleType: 'manual' | 'automatic';
   month: number;
   company: string;
+  isComplete: boolean;
 }
 
 const ShiftSchema = new mongoose.Schema({
@@ -43,6 +44,11 @@ const ShiftSchema = new mongoose.Schema({
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Company',
     required: true,
+  },
+  isComplete: {
+    type: Boolean,
+    required: true,
+    default: false,
   },
 });
 

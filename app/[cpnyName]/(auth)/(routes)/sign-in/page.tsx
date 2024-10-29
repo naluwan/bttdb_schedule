@@ -62,7 +62,6 @@ const SignInPage = () => {
         setIsInitialized(true);
         // 設置token
         Cookies.set('BTTDB_JWT_TOKEN', res.data.token);
-        localStorage.setItem('EZY_SCHEDULE_CPNY_NAME', cpnyName as string);
 
         // 比對是否修改預設密碼
         const isMatch = await bcrypt.compare('BTTDB1234', res.data.user?.password);

@@ -1,10 +1,11 @@
 import { NextResponse } from 'next/server';
 import connect from '@/lib/mongodb';
-import { authenticateToken } from '@/lib/authMiddleware';
+import { authenticateToken, checkAdminAndSuperAdmin } from '@/lib/authMiddleware';
 import Shift from '@/models/Shift';
 import mongoose from 'mongoose';
 import Company from '@/models/Company';
 import { toZonedTime, formatInTimeZone } from 'date-fns-tz';
+
 connect();
 
 export async function GET(
@@ -99,6 +100,16 @@ export async function POST(
       return NextResponse.json({ status: 403, message: 'Token已過期' });
     }
 
+    // 檢查是否為admin和super-admin
+    try {
+      checkAdminAndSuperAdmin(user);
+    } catch (err) {
+      if (err instanceof Error) {
+        return NextResponse.json({ status: 403, message: err.message });
+      }
+      return NextResponse.json({ status: 403, message: '權限不足' });
+    }
+
     const company = await Company.findOne({ enName: companyName });
     if (!company) {
       return NextResponse.json({
@@ -146,6 +157,7 @@ export async function POST(
       employee,
       month,
       company: company._id,
+      isComplete: false,
       scheduleType: 'manual',
     });
     await newShift.save();

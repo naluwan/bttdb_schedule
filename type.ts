@@ -41,6 +41,7 @@ export type ShiftDetailType = {
   endDate: Date;
   isAvailable: boolean;
   employee: EmployeeType;
+  isComplete: boolean;
 };
 
 export type EventType = {
@@ -51,6 +52,7 @@ export type EventType = {
   isAvailable: boolean;
   employee: string;
   employeeName?: string;
+  isComplete?: boolean;
 };
 
 export type EditShiftType = {

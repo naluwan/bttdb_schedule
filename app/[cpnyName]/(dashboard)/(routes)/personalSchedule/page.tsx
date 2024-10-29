@@ -81,6 +81,9 @@ const PersonalSchedulePage = () => {
   });
   const [filterData, setFilterData] = useState('all');
   const [editShift, setEditShift] = useState<EditShiftType | null>(null);
+  const [filteredEmployee, setFilteredEmployee] = useState<
+    { name: string; employeeId: string }[]
+  >([]);
   // 導航按鈕文字state
   const [customMessages, setCustomMessages] = useState({
     date: '日期',
@@ -97,6 +100,9 @@ const PersonalSchedulePage = () => {
     agenda: '議程',
     showMore: (count: number) => `還有 ${count} 個事件`,
   });
+
+  const [isComplete, setIsComplete] = useState(false);
+  const [isCompleteLoading, setIsCompleteLoading] = useState(false);
 
   // 修改導航按鈕文字
   useEffect(() => {
@@ -302,7 +308,7 @@ const PersonalSchedulePage = () => {
   };
 
   // 獲取員工資料
-  const { data: employeeData, isLoading: employeeDataLoading } = useSWR(
+  const { data: employeeData } = useSWR(
     [`/api/${cpnyName}/employee`, token],
     getAllEmployeeData,
   );
@@ -322,6 +328,7 @@ const PersonalSchedulePage = () => {
             employee: shiftDetail.employee._id,
             _id: shiftDetail._id,
             employeeName: shiftDetail.employee.name,
+            isComplete: shiftDetail.isComplete,
           };
         }),
       );
@@ -348,6 +355,7 @@ const PersonalSchedulePage = () => {
             employee: filteredShiftDetail.employee._id,
             _id: filteredShiftDetail._id,
             employeeName: filteredShiftDetail.employee.name,
+            isComplete: filteredShiftDetail.isComplete,
           };
         }),
       );
@@ -368,6 +376,22 @@ const PersonalSchedulePage = () => {
       });
     }
   }, [filterData, data, user, selectedDate, employeeData]);
+
+  // 檢查當月是否送出排班
+  useEffect(() => {
+    if (eventsData && eventsData.length > 0) {
+      const nowMonthShifts = eventsData.filter(
+        (shift) => new Date(shift.start).getMonth() + 1 === date.getMonth() + 1,
+      );
+      if (nowMonthShifts.length > 0) {
+        setIsComplete(nowMonthShifts.every((shift) => shift.isComplete));
+      } else {
+        setIsComplete(false);
+      }
+    } else {
+      setIsComplete(false);
+    }
+  }, [eventsData, date]);
 
   // 送出排班
   const atSubmit = useCallback(
@@ -508,15 +532,28 @@ const PersonalSchedulePage = () => {
     [editShift, token, mutate, setOpenEdit, setEditShift, setIsLoading, cpnyName],
   );
 
+  // 過濾員工
+  useEffect(() => {
+    if (employeeData) {
+      employeeData.data?.forEach((employee: EmployeeType) => {
+        if (employee.role !== 'shareholder' && employee.role !== 'super-admin') {
+          setFilteredEmployee((prev) =>
+            prev.concat({ name: employee.name, employeeId: employee._id }),
+          );
+        }
+      });
+    }
+    return () => {
+      setFilteredEmployee([]);
+    };
+  }, [employeeData]);
+
   // 自動排班
   const atAutoSchedule = useCallback(
     async (e: React.MouseEvent) => {
       e.preventDefault();
       setAutoScheduleLoading(true);
       const nowMonth = date.getMonth() + 1;
-      const filteredEmployee = employeeData.data?.map((employee: EmployeeType) => {
-        return { name: employee.name, employeeId: employee._id };
-      });
 
       const data = { filteredEmployee, month: nowMonth };
 
@@ -538,7 +575,7 @@ const PersonalSchedulePage = () => {
       // 取消Loading狀態
       setAutoScheduleLoading(false);
     },
-    [employeeData, token, cpnyName, date, setAutoScheduleLoading, mutate],
+    [token, cpnyName, date, setAutoScheduleLoading, mutate, filteredEmployee],
   );
 
   // 移除自動排班
@@ -579,6 +616,33 @@ const PersonalSchedulePage = () => {
     }, {} as Record<string, number>);
   }, [eventsData, date]);
 
+  // 確認排班
+  const atCompleteShift = useCallback(
+    async (e: React.MouseEvent) => {
+      e.preventDefault();
+      setIsCompleteLoading(true);
+      const nowMonth = date.getMonth() + 1;
+      const data = { month: nowMonth };
+      const res = await axios.patch(`/api/${cpnyName}/shift/allShifts`, data, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      if (res.status === 201 || res.status === 200) {
+        if (res.data.status === 201 || res.data.status === 200) {
+          toast.success(res.data.message);
+          mutate();
+        } else {
+          toast.error(res.data.message);
+        }
+      }
+      // 取消Loading狀態
+      setIsCompleteLoading(false);
+    },
+    [date, token, cpnyName, mutate, setIsCompleteLoading],
+  );
+
   return (
     <div className='p-6'>
       <div className='flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between'>
@@ -588,7 +652,7 @@ const PersonalSchedulePage = () => {
           {user?.role === 'admin' ||
             (user?.role === 'super-admin' && (
               <div className='mb-4 flex flex-col justify-between md:flex-row'>
-                <div className='mb-4'>
+                <div className='mb-4 flex-shrink-0'>
                   <Select
                     onValueChange={(value: string) => setFilterData(value)}
                     defaultValue='all'
@@ -599,9 +663,12 @@ const PersonalSchedulePage = () => {
                     </SelectTrigger>
                     <SelectContent className='w-full'>
                       <SelectItem value='all'>全部員工</SelectItem>
-                      {!employeeDataLoading &&
-                        employeeData?.data.map((employee: EmployeeType) => (
-                          <SelectItem key={employee._id} value={employee._id}>
+                      {filteredEmployee.length > 0 &&
+                        filteredEmployee.map((employee) => (
+                          <SelectItem
+                            key={employee.employeeId}
+                            value={employee.employeeId}
+                          >
                             {employee.name}
                           </SelectItem>
                         ))}
@@ -610,15 +677,27 @@ const PersonalSchedulePage = () => {
                 </div>
                 {((user?.role as 'admin' | 'super-admin') === 'admin' ||
                   (user?.role as 'admin' | 'super-admin') === 'super-admin') && (
-                  <div className='flex justify-center gap-4'>
-                    <Button variant='default' onClick={(e) => atAutoSchedule(e)}>
+                  <div className='flex w-full flex-col justify-between gap-4 md:flex-row md:justify-end'>
+                    <Button
+                      variant='default'
+                      onClick={(e) => atAutoSchedule(e)}
+                      disabled={autoScheduleLoading}
+                    >
                       自動排班
                     </Button>
                     <Button
                       variant='destructive'
                       onClick={(e) => atRemoveAutoSchedule(e)}
+                      disabled={deleteAutoScheduleLoading}
                     >
                       移除自動排班
+                    </Button>
+                    <Button
+                      variant={isComplete ? 'destructive' : 'default'}
+                      onClick={atCompleteShift}
+                      disabled={isCompleteLoading}
+                    >
+                      {isComplete ? '收回排班' : '送出排班'}
                     </Button>
                   </div>
                 )}
