@@ -26,9 +26,10 @@ type ChangePassBtnType = {
   isEdit: boolean;
   user: UserType;
   employee: EmployeeType;
+  mutate: () => void;
 };
 
-const ChangePassBtn = ({ isEdit, user, employee }: ChangePassBtnType) => {
+const ChangePassBtn = ({ isEdit, user, employee, mutate }: ChangePassBtnType) => {
   const { cpnyName } = useParams();
   const [open, setOpen] = useState(false);
   const [passInfo, setPassInfo] = useState({
@@ -80,6 +81,7 @@ const ChangePassBtn = ({ isEdit, user, employee }: ChangePassBtnType) => {
       const result = res.data;
 
       if (result.status === 201 || result.status === 200) {
+        mutate();
         toast.success(result.message);
       } else {
         toast.error(result.message);
@@ -88,7 +90,7 @@ const ChangePassBtn = ({ isEdit, user, employee }: ChangePassBtnType) => {
       // 取消Loading狀態
       setIsLoading(false);
     },
-    [passInfo, setIsLoading, token],
+    [passInfo, setIsLoading, token, cpnyName, mutate],
   );
 
   return (

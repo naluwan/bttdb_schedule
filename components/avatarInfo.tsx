@@ -52,7 +52,7 @@ const AvatarInfo = () => {
     } else {
       toast.error(result.message);
     }
-  }, [setIsOpenSchedule, token]);
+  }, [setIsOpenSchedule, token, cpnyName]);
 
   return (
     <DropdownMenu open={open} onOpenChange={setOpen}>

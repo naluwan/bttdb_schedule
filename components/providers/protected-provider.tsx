@@ -32,12 +32,12 @@ const ProtectedProvider = ({ children }: { children: React.ReactNode }) => {
   useEffect(() => {
     const checkProfileAndPassword = async () => {
       if (!user) {
-        // router.push(`/${cpnyName}/sign-in`);
-        router.push(pathName);
+        router.push(`/${cpnyName}/sign-in`);
         return;
       }
+
       // 比對是否修改預設密碼
-      const isMatch = await bcrypt.compare('BTTDB1234', user?.password);
+      const isMatch = await bcrypt.compare('BTTDB1234', user?.password as string);
 
       // 比對是否完成個人資料
       const isProfileComplete = user?.birthday && user?.address && user?.emergencyContact;
@@ -48,14 +48,18 @@ const ProtectedProvider = ({ children }: { children: React.ReactNode }) => {
       if (!isProfileComplete || !isPasswordChanged) {
         if (!isProfileComplete) {
           setIsCompleteProfile(false); // 若資料不完整，設定為 false
+        } else {
+          setIsCompleteProfile(true); // 若資料完整，設定為 true
         }
         if (!isPasswordChanged) {
           setIsChangePassword(false); // 若密碼未修改，設定為 false
+        } else {
+          setIsChangePassword(true); // 若密碼已修改，設定為 true
         }
       }
     };
     checkProfileAndPassword();
-  }, [user, cpnyName, setIsCompleteProfile, setIsChangePassword, router, pathName]);
+  }, [user, cpnyName, setIsCompleteProfile, setIsChangePassword, router]);
 
   useEffect(() => {
     // 嘗試從 localStorage 獲取 cpnyName
@@ -65,8 +69,8 @@ const ProtectedProvider = ({ children }: { children: React.ReactNode }) => {
     }
 
     if (!user) {
-      router.push(pathName);
-      // router.push(`/${cpnyName}/sign-in`);
+      // router.push(pathName);
+      router.push(`/${cpnyName}/sign-in`);
       return;
     }
 
@@ -77,15 +81,15 @@ const ProtectedProvider = ({ children }: { children: React.ReactNode }) => {
         router.push(pathName);
       }
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
     user,
     isInitialized,
     isCompleteProfile,
     isChangePassword,
     cpnyName,
-    pathName,
-    router,
     setCpnyName,
+    router,
   ]);
 
   return children;

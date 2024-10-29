@@ -11,16 +11,24 @@ import bcrypt from 'bcryptjs';
 const SignInPage = () => {
   const router = useRouter();
   const { cpnyName } = useParams();
-  const { isLoading, setUser, setIsLoading, setIsCompleteProfile, setIsChangePassword } =
-    useStore((state) => {
-      return {
-        isLoading: state.isLoading,
-        setUser: state.setUser,
-        setIsLoading: state.setIsLoading,
-        setIsCompleteProfile: state.setIsCompleteProfile,
-        setIsChangePassword: state.setIsChangePassword,
-      };
-    });
+  localStorage.setItem('EZY_SCHEDULE_CPNY_NAME', cpnyName as string);
+  const {
+    isLoading,
+    setUser,
+    setIsLoading,
+    setIsCompleteProfile,
+    setIsChangePassword,
+    setIsInitialized,
+  } = useStore((state) => {
+    return {
+      isLoading: state.isLoading,
+      setUser: state.setUser,
+      setIsLoading: state.setIsLoading,
+      setIsCompleteProfile: state.setIsCompleteProfile,
+      setIsChangePassword: state.setIsChangePassword,
+      setIsInitialized: state.setIsInitialized,
+    };
+  });
   const [accountInfo, setAccountInfo] = useState({
     email: '',
     password: '',
@@ -51,7 +59,7 @@ const SignInPage = () => {
       } else {
         toast.success('登入成功');
         setUser(res.data.user);
-
+        setIsInitialized(true);
         // 設置token
         Cookies.set('BTTDB_JWT_TOKEN', res.data.token);
         localStorage.setItem('EZY_SCHEDULE_CPNY_NAME', cpnyName as string);
@@ -86,7 +94,16 @@ const SignInPage = () => {
       setAccountInfo({ email: '', password: '', companyName: cpnyName });
       setIsLoading(false);
     },
-    [accountInfo, router, setIsLoading, setUser, cpnyName],
+    [
+      accountInfo,
+      router,
+      setIsLoading,
+      setUser,
+      cpnyName,
+      setIsChangePassword,
+      setIsCompleteProfile,
+      setIsInitialized,
+    ],
   );
 
   return (

@@ -62,7 +62,7 @@ const MobileSidebar = () => {
         </SheetDescription>
         <div className='flex h-full flex-col overflow-y-auto border-r bg-white shadow-sm'>
           <div className='p-6'>
-            <Image src={sheetLogo} width={130} height={130} alt='sheet-logo' />
+            <Image src={sheetLogo} width={130} height={130} alt='sheet-logo' priority />
           </div>
           <div className='flex h-full w-full flex-col'>
             <div className={cn('flex w-full flex-col items-start gap-y-2')}>

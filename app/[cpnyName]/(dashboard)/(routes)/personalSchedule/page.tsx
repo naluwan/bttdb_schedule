@@ -269,13 +269,14 @@ const PersonalSchedulePage = () => {
     return response.json();
   };
 
+  // 獲取排班資料
   const {
     data,
     mutate,
     isLoading: shiftsLoading,
   } = useSWR([`/api/${cpnyName}/shift`, token], getEmployeeShift);
 
-  // 定義一個 function 來調用 API
+  // 定義一個 function 來調用 API 獲取員工資料
   const getAllEmployeeData = async () => {
     if (!token) {
       return router.push(`/${cpnyName}/sign-in`); // 如果 token 不存在，回到登入頁面
@@ -300,6 +301,7 @@ const PersonalSchedulePage = () => {
     return response.json();
   };
 
+  // 獲取員工資料
   const { data: employeeData, isLoading: employeeDataLoading } = useSWR(
     [`/api/${cpnyName}/employee`, token],
     getAllEmployeeData,
@@ -655,7 +657,9 @@ const PersonalSchedulePage = () => {
           ) : (
             <Calendar
               views={['day', 'month']}
-              selectable
+              selectable={
+                isOpenSchedule || user?.role === 'admin' || user?.role === 'super-admin'
+              }
               localizer={localizer}
               formats={{
                 dateFormat: 'MM/DD',

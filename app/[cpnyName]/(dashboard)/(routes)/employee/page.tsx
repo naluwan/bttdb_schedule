@@ -81,7 +81,7 @@ const EmployeePage = () => {
     if (!token) {
       router.push(`/${cpnyName}/sign-in`);
     }
-  }, [router, token]);
+  }, [router, token, cpnyName]);
 
   // 定義一個 function 來調用 API
   const getAllEmployeeData = async () => {
@@ -169,7 +169,7 @@ const EmployeePage = () => {
       // 取消Loading狀態
       setIsLoading(false);
     },
-    [newEmployee, setIsLoading, token, mutate],
+    [newEmployee, setIsLoading, token, mutate, cpnyName],
   );
 
   const [filter, setFilter] = useState<string>('all');

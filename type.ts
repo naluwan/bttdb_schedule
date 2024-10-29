@@ -61,3 +61,14 @@ export type EditShiftType = {
   employee?: string;
   employeeName?: string;
 };
+export type CompanyType = {
+  _id: string;
+  id: string;
+  name: string;
+  nickName: string;
+  enName: string;
+  email: string;
+  phone: string;
+  address: string;
+  isLocked: boolean;
+};

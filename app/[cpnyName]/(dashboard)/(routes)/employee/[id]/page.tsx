@@ -3,7 +3,7 @@ import Cookies from 'js-cookie';
 import { LoaderCircle, OctagonAlert, Pencil } from 'lucide-react';
 import React, { useCallback, useEffect, useState } from 'react';
 import useSWR from 'swr';
-import { useParams, useSearchParams, useRouter } from 'next/navigation';
+import { useParams, useRouter } from 'next/navigation';
 import { EmployeeType } from '@/models/Employee';
 
 import {
@@ -49,8 +49,6 @@ const EmployeeDetailPage = () => {
   const params = useParams<{ id: string }>();
   const { id } = params;
   const { cpnyName } = useParams();
-  const searchParams = useSearchParams();
-  const page = searchParams.get('page');
 
   // 獲取token
   const token = Cookies.get('BTTDB_JWT_TOKEN');
@@ -58,9 +56,9 @@ const EmployeeDetailPage = () => {
 
   useEffect(() => {
     if (!token) {
-      router.push('/sign-in');
+      router.push(`/${cpnyName}/sign-in`);
     }
-  }, [router, token]);
+  }, [router, token, cpnyName]);
 
   const [isEdit, setIsEdit] = useState(false);
   const [openDateEmployed, setOpenDateEmployed] = useState(false);
@@ -132,6 +130,7 @@ const EmployeeDetailPage = () => {
     getEmployeeData,
   );
 
+  // 設定員工資料
   useEffect(() => {
     if (data) {
       setEmployeeData(data.data);
@@ -149,6 +148,7 @@ const EmployeeDetailPage = () => {
     }
   }, [data]);
 
+  // 檢查員工資料是否完整
   useEffect(() => {
     const checkProfile = async () => {
       if (!employeeData) return;
@@ -170,11 +170,8 @@ const EmployeeDetailPage = () => {
         setIsChangePassword(true);
       }
     };
-    if (
-      employeeData?._id === id &&
-      user?.role !== 'admin' &&
-      user?.role !== 'super-admin'
-    ) {
+
+    if (employeeData?._id === id) {
       checkProfile();
     }
   }, [employeeData, setIsChangePassword, setIsCompleteProfile, id, user]);
@@ -218,7 +215,7 @@ const EmployeeDetailPage = () => {
     setIsEdit(false);
   }, [data]);
 
-  // 更新員工資料
+  // 送出更新員工資料
   const atSubmit = useCallback(
     async (e: React.MouseEvent) => {
       e.preventDefault();
@@ -282,13 +279,13 @@ const EmployeeDetailPage = () => {
 
   return (
     <div className='p-6'>
-      {user?.role === 'admin' ? (
+      {user?.role === 'admin' || user?.role === 'super-admin' ? (
         <Breadcrumb className='pb-6'>
           <BreadcrumbList>
             <BreadcrumbItem>
               <BreadcrumbLink
                 className='text-2xl md:text-3xl'
-                href={`/${cpnyName}/employee?page=${page}`}
+                href={`/${cpnyName}/employee`}
               >
                 員工資料
               </BreadcrumbLink>
@@ -351,6 +348,7 @@ const EmployeeDetailPage = () => {
               isEdit={isEdit}
               user={user as UserType}
               employee={employeeData as EmployeeType}
+              mutate={mutate}
             />
 
             <CardContent>

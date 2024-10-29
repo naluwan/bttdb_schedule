@@ -44,7 +44,9 @@ const useStore = create<State>((set) => {
     },
     onLogout() {
       set({ user: null });
+      // const cpnyName = localStorage.getItem('EZY_SCHEDULE_CPNY_NAME');
       cleanToken();
+      // window.location.href = `/${cpnyName}/sign-in`;
     },
   };
 });

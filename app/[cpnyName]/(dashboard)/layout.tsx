@@ -25,7 +25,7 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
     if (!token) {
       router.push(`/${cpnyName}/sign-in`);
     }
-  }, [token, router]);
+  }, [token, router, cpnyName]);
 
   // 定義一個 function 來調用 API
   const getSettingData = async () => {
@@ -64,7 +64,7 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
     } else if (settingData) {
       router.push(`/${cpnyName}/sign-in`);
     }
-  }, [settingData, setIsOpenSchedule, router]);
+  }, [settingData, setIsOpenSchedule, router, cpnyName]);
 
   return (
     <div className='h-full'>

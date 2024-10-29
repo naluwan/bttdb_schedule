@@ -1,8 +1,8 @@
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import useStore from '@/store';
 import axios from 'axios';
 import Cookies from 'js-cookie';
-import { useParams, useRouter } from 'next/navigation';
+import { useRouter } from 'next/navigation';
 import toast from 'react-hot-toast';
 import { usePathname } from 'next/navigation';
 
@@ -10,15 +10,13 @@ const useAuth = () => {
   const router = useRouter();
   const pathName = usePathname();
 
-  const { setUser, cpnyName, setIsInitialized, isInitialized, setCpnyName } = useStore(
-    (state) => ({
-      setUser: state.setUser,
-      cpnyName: state.cpnyName,
-      setIsInitialized: state.setIsInitialized,
-      isInitialized: state.isInitialized,
-      setCpnyName: state.setCpnyName,
-    }),
-  );
+  const { setUser, cpnyName, setIsInitialized, setCpnyName } = useStore((state) => ({
+    setUser: state.setUser,
+    cpnyName: state.cpnyName,
+    setIsInitialized: state.setIsInitialized,
+    isInitialized: state.isInitialized,
+    setCpnyName: state.setCpnyName,
+  }));
 
   useEffect(() => {
     const token = Cookies.get('BTTDB_JWT_TOKEN');
@@ -28,6 +26,7 @@ const useAuth = () => {
     if (storedCpnyName) {
       setCpnyName(storedCpnyName);
     }
+
     if (token) {
       // 每次呼叫時驗證token
       axios
@@ -54,6 +53,7 @@ const useAuth = () => {
           router.push(`/${cpnyName}/sign-in`);
         });
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 };
 
