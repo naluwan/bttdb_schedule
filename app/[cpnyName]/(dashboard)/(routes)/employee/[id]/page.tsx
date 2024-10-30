@@ -1,6 +1,6 @@
 'use client';
 import Cookies from 'js-cookie';
-import { LoaderCircle, OctagonAlert, Pencil } from 'lucide-react';
+import { KeyRound, LoaderCircle, OctagonAlert, Pencil } from 'lucide-react';
 import React, { useCallback, useEffect, useState } from 'react';
 import useSWR from 'swr';
 import { useParams, useRouter } from 'next/navigation';
@@ -325,7 +325,12 @@ const EmployeeDetailPage = () => {
                 <OctagonAlert className='h-4 w-4' />
                 <AlertTitle>完善個人資料</AlertTitle>
                 <AlertDescription>
-                  請將生日、地址、緊急聯絡人資料填寫完整
+                  <div className='flex items-center gap-2'>
+                    <p>請點擊卡片右上角</p>
+                    <Pencil className='h-4 w-4' />
+                    <p>開啟編輯模式</p>
+                  </div>
+                  <p>將生日、地址、緊急聯絡人資料填寫完整</p>
                 </AlertDescription>
               </Alert>
             )}
@@ -334,7 +339,14 @@ const EmployeeDetailPage = () => {
               <Alert className='bg-red-300'>
                 <OctagonAlert className='h-4 w-4' />
                 <AlertTitle>修改預設密碼</AlertTitle>
-                <AlertDescription>請將預設密碼修改</AlertDescription>
+                <AlertDescription>
+                  <div className='flex items-center gap-2'>
+                    <p>請點擊卡片右上角</p>
+                    <KeyRound className='h-4 w-4' />
+                    <p>修改密碼</p>
+                  </div>
+                  <p>請將預設密碼修改為自己的密碼</p>
+                </AlertDescription>
               </Alert>
             )}
           </div>
@@ -470,7 +482,14 @@ const EmployeeDetailPage = () => {
                     customClass='text-xl md:text-2xl'
                   />
                 </div>
-                <div>
+                <div
+                  className={cn(
+                    isEdit &&
+                      user?.role !== 'admin' &&
+                      user?.role !== 'super-admin' &&
+                      'hidden',
+                  )}
+                >
                   <Label className='whitespace-nowrap text-xl font-bold text-gray-700 md:text-2xl'>
                     到職日期:
                   </Label>
