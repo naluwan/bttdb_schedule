@@ -16,7 +16,14 @@ import {
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
 
-import { Ellipsis, Loader, LoaderCircle, Trash2 } from 'lucide-react';
+import {
+  Ellipsis,
+  Loader,
+  LoaderCircle,
+  Megaphone,
+  OctagonAlert,
+  Trash2,
+} from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
 import useStore from '@/store';
@@ -667,6 +674,21 @@ const PersonalSchedulePage = () => {
         {/* 日曆部分，顯示當天的上班人員 */}
         <div className='container mx-auto p-4'>
           <h1 className='mb-4 text-center text-2xl font-bold'>排班日曆</h1>
+          {isOpenSchedule ? (
+            <div className='mb-4 flex items-center justify-center gap-2'>
+              <Megaphone className='h-6 w-6' />
+              <div className='text-center text-xl font-bold'>
+                已開放排班，請在15號之前完成排班
+              </div>
+            </div>
+          ) : (
+            <div className='mb-4 flex items-center justify-center gap-2'>
+              <OctagonAlert className='h-5 w-5 text-yellow-500' />
+              <h2 className='text-center text-xl font-bold text-yellow-500'>
+                目前未開放排班，可排班時間為每月1號至15號
+              </h2>
+            </div>
+          )}
           {user?.role === 'admin' ||
             (user?.role === 'super-admin' && (
               <div className='mb-4 flex flex-col justify-between md:flex-row'>
