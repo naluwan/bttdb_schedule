@@ -93,7 +93,7 @@ const AvatarInfo = () => {
           </>
         )}
         <DropdownMenuItem onClick={onLogout}>
-          <LogOut className='mr-2 h-4 w-4' />
+          <LogOut className='h-4 w-4' />
           <span>登出</span>
         </DropdownMenuItem>
       </DropdownMenuContent>
