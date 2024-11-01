@@ -683,66 +683,61 @@ const PersonalSchedulePage = () => {
             </div>
           ) : (
             <div className='mb-4 flex items-center justify-center gap-2'>
-              <OctagonAlert className='h-5 w-5 text-yellow-500' />
-              <h2 className='text-center text-xl font-bold text-yellow-500'>
-                目前未開放排班，可排班時間為每月1號至15號
+              <OctagonAlert className='h-4 w-4 text-yellow-500 md:h-6 md:w-6' />
+              <h2 className='text-center text-sm font-bold text-yellow-500 md:text-xl'>
+                未開放排班，可排班時間為每月1號至15號
               </h2>
             </div>
           )}
-          {user?.role === 'admin' ||
-            (user?.role === 'super-admin' && (
-              <div className='mb-4 flex flex-col justify-between md:flex-row'>
-                <div className='mb-4 flex-shrink-0'>
-                  <Select
-                    onValueChange={(value: string) => setFilterData(value)}
-                    defaultValue='all'
-                  >
-                    {/* 設置 w-full 使其填滿父容器 */}
-                    <SelectTrigger className='w-full'>
-                      <SelectValue placeholder='請選擇顯示員工' />
-                    </SelectTrigger>
-                    <SelectContent className='w-full'>
-                      <SelectItem value='all'>全部員工</SelectItem>
-                      {filteredEmployee.length > 0 &&
-                        filteredEmployee.map((employee) => (
-                          <SelectItem
-                            key={employee.employeeId}
-                            value={employee.employeeId}
-                          >
-                            {employee.name}
-                          </SelectItem>
-                        ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-                {((user?.role as 'admin' | 'super-admin') === 'admin' ||
-                  (user?.role as 'admin' | 'super-admin') === 'super-admin') && (
-                  <div className='flex w-full flex-col justify-between gap-4 md:flex-row md:justify-end'>
-                    <Button
-                      variant='default'
-                      onClick={(e) => atAutoSchedule(e)}
-                      disabled={autoScheduleLoading}
-                    >
-                      自動排班
-                    </Button>
-                    <Button
-                      variant='destructive'
-                      onClick={(e) => atRemoveAutoSchedule(e)}
-                      disabled={deleteAutoScheduleLoading}
-                    >
-                      移除自動排班
-                    </Button>
-                    <Button
-                      variant={isComplete ? 'destructive' : 'default'}
-                      onClick={atCompleteShift}
-                      disabled={isCompleteLoading}
-                    >
-                      {isComplete ? '收回排班' : '送出排班'}
-                    </Button>
-                  </div>
-                )}
+          {(user?.role === 'admin' || user?.role === 'super-admin') && (
+            <div className='mb-4 flex flex-col justify-between md:flex-row'>
+              <div className='mb-4 flex-shrink-0'>
+                <Select
+                  onValueChange={(value: string) => setFilterData(value)}
+                  defaultValue='all'
+                >
+                  {/* 設置 w-full 使其填滿父容器 */}
+                  <SelectTrigger className='w-full'>
+                    <SelectValue placeholder='請選擇顯示員工' />
+                  </SelectTrigger>
+                  <SelectContent className='w-full'>
+                    <SelectItem value='all'>全部員工</SelectItem>
+                    {filteredEmployee.length > 0 &&
+                      filteredEmployee.map((employee) => (
+                        <SelectItem key={employee.employeeId} value={employee.employeeId}>
+                          {employee.name}
+                        </SelectItem>
+                      ))}
+                  </SelectContent>
+                </Select>
               </div>
-            ))}
+              {(user?.role === 'admin' || user?.role === 'super-admin') && (
+                <div className='flex w-full flex-col justify-between gap-4 md:flex-row md:justify-end'>
+                  <Button
+                    variant='default'
+                    onClick={(e) => atAutoSchedule(e)}
+                    disabled={autoScheduleLoading}
+                  >
+                    自動排班
+                  </Button>
+                  <Button
+                    variant='destructive'
+                    onClick={(e) => atRemoveAutoSchedule(e)}
+                    disabled={deleteAutoScheduleLoading}
+                  >
+                    移除自動排班
+                  </Button>
+                  <Button
+                    variant={isComplete ? 'destructive' : 'default'}
+                    onClick={atCompleteShift}
+                    disabled={isCompleteLoading}
+                  >
+                    {isComplete ? '收回排班' : '送出排班'}
+                  </Button>
+                </div>
+              )}
+            </div>
+          )}
 
           {employeeAvailability && (
             <div className='mb-4 flex flex-col gap-4 md:flex-row'>
