@@ -740,7 +740,7 @@ const PersonalSchedulePage = () => {
           )}
 
           {employeeAvailability && (
-            <div className='mb-4 flex flex-col gap-4 md:flex-row'>
+            <div className='mb-4 flex flex-col flex-wrap gap-4 md:flex-row'>
               {Object.entries(employeeAvailability).map(([employeeName, count]) => (
                 <div
                   className='rounded-lg border p-2'

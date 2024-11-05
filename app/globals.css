@@ -142,3 +142,17 @@ body,
     transform: translateY(-4px);
   }
 }
+
+.day-event.rbc-event {
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  width: 38px !important;
+  writing-mode: vertical-rl !important;
+  color: white !important;
+  border-radius: 5px !important;
+}
+
+.day-event .rbc-event-label {
+  display: none !important;
+}
