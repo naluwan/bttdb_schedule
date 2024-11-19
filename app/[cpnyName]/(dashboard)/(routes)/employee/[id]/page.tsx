@@ -29,6 +29,9 @@ import { UserType } from '@/type';
 import DatePicker from '@/components/datePicker/datePicker';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import bcrypt from 'bcryptjs';
+import { Calendar, momentLocalizer } from 'react-big-calendar';
+import moment from 'moment';
+
 type EmployeeDetailType = {
   _id: string;
   id: string;
@@ -44,6 +47,15 @@ type EmployeeDetailType = {
   address: string;
   role: string;
 };
+
+type AttendanceEventType = {
+  start: Date;
+  end: Date;
+  title: string;
+  employee: EmployeeType;
+};
+
+const localizer = momentLocalizer(moment);
 
 const EmployeeDetailPage = () => {
   const params = useParams<{ id: string }>();
@@ -100,7 +112,47 @@ const EmployeeDetailPage = () => {
     };
   });
 
-  // 定義一個 function 來調用 API
+  const [events, setEvents] = useState<AttendanceEventType[]>([]);
+
+  // 定義一個 function 來調用 API 取得員工考勤資料
+  const getEmployeeAttendance = async () => {
+    if (!token) {
+      return router.push(`/${cpnyName}/sign-in`); // 如果 token 不存在，回到登入頁面
+    }
+
+    const response = await fetch(`/api/${cpnyName}/attendance/${id}`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    if (!response.ok) {
+      if (response.status === 401) {
+        // Token 驗證失敗，回到登入頁面
+        router.push(`/${cpnyName}/sign-in`);
+        return;
+      }
+
+      throw new Error('An error occurred while fetching the data.');
+    }
+
+    return response.json();
+  };
+
+  // 透過useSWR取得員工考勤資料
+  const { data: attendanceData } = useSWR(
+    [`/api/${cpnyName}/attendance/${id}`, token],
+    getEmployeeAttendance,
+  );
+
+  // 設定考勤資料
+  useEffect(() => {
+    if (attendanceData) {
+      setEvents(attendanceData.data);
+    }
+  }, [attendanceData]);
+
+  // 定義一個 function 來調用 API 取得員工資料
   const getEmployeeData = async () => {
     if (!token) {
       return router.push(`/${cpnyName}/sign-in`); // 如果 token 不存在，回到登入頁面
@@ -125,6 +177,7 @@ const EmployeeDetailPage = () => {
     return response.json();
   };
 
+  // 透過useSWR取得員工資料
   const { data, mutate } = useSWR(
     [`/api/${cpnyName}/employee/${id}`, token],
     getEmployeeData,
@@ -721,6 +774,18 @@ const EmployeeDetailPage = () => {
               </Button>
             </CardFooter>
           </Card>
+
+          {user?.role === 'super-admin' && (
+            <div>
+              <Calendar
+                localizer={localizer}
+                events={events}
+                startAccessor='start'
+                endAccessor='end'
+                style={{ height: 500 }}
+              />
+            </div>
+          )}
         </>
       )}
     </div>

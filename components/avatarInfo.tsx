@@ -1,5 +1,5 @@
-import React, { useCallback, useState } from 'react';
-import { CircleUserRound, LogOut, User } from 'lucide-react';
+import React, { useCallback, useEffect, useState } from 'react';
+import { CircleUserRound, LogIn, LogOut, User } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 import {
@@ -23,6 +23,7 @@ import { useParams } from 'next/navigation';
 const AvatarInfo = () => {
   const { cpnyName } = useParams();
   const [open, setOpen] = useState(false);
+  const [isValidNetwork, setIsValidNetwork] = useState(false);
   const { onLogout, user, isOpenSchedule, setIsOpenSchedule } = useStore((state) => {
     return {
       onLogout: state.onLogout,
@@ -38,6 +39,37 @@ const AvatarInfo = () => {
 
   const token = Cookies.get('BTTDB_JWT_TOKEN');
 
+  // 驗證網路
+  useEffect(() => {
+    async function checkNetwork() {
+      try {
+        // 使用第三方 API 取得使用者的 IP
+        const response = await fetch('https://api.ipify.org?format=json');
+        const data = await response.json();
+        const ipAddress = data.ip;
+        console.log('ipAddress', ipAddress);
+        // 將 IP 傳送到 Next.js API 驗證
+        const res = await axios(`/api/${cpnyName}/auth/verifyNetwork`, {
+          data: { ipAddress },
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        });
+        const verifyData = res.data;
+        console.log('verifyData', verifyData);
+        setIsValidNetwork(verifyData.isValid);
+      } catch (error) {
+        console.error('無法驗證網路:', error);
+        toast.error('無法驗證網路，請重新嘗試');
+      }
+    }
+
+    checkNetwork();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // 切換開放排班
   const atSwitchOpenSchedule = useCallback(async () => {
     const res = await axios.patch(
       `/api/${cpnyName}/setting/openSchedule`,
@@ -92,6 +124,13 @@ const AvatarInfo = () => {
             <DropdownMenuSeparator />
           </>
         )}
+        {user?.role === 'super-admin' && (
+          <DropdownMenuItem onClick={() => console.log('isValidNetwork', isValidNetwork)}>
+            <LogIn className='h-4 w-4' />
+            <span>打卡</span>
+          </DropdownMenuItem>
+        )}
+
         <DropdownMenuItem onClick={onLogout}>
           <LogOut className='h-4 w-4' />
           <span>登出</span>

@@ -3,13 +3,15 @@ import { CompanyType, EventType, ShiftDetailType } from '@/type';
 import Cookies from 'js-cookie';
 import moment from 'moment';
 import { useParams, useRouter } from 'next/navigation';
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Calendar, momentLocalizer, View } from 'react-big-calendar';
 import useSWR from 'swr';
 import 'moment/locale/zh-tw';
 import 'react-big-calendar/lib/css/react-big-calendar.css';
 import { Loader } from 'lucide-react';
 import randomColor from 'randomcolor';
+import jsPDF from 'jspdf';
+import html2canvas from 'html2canvas';
 
 moment.locale('zh-tw');
 
@@ -190,23 +192,30 @@ const SchedulePage = () => {
   // 篩選員工排班資料
   useEffect(() => {
     setEventsData(
-      data?.data?.map((shiftDetail: ShiftDetailType) => {
-        return {
-          start: new Date(shiftDetail.startDate),
-          end: new Date(
-            new Date(shiftDetail.endDate).setHours(
-              new Date(shiftDetail.endDate).getHours() - 8,
+      data?.data
+        ?.filter(
+          (shiftDetail: ShiftDetailType) =>
+            (shiftDetail.employee.role === 'part-time' && shiftDetail.isAvailable) ||
+            shiftDetail.employee.role === 'full-time' ||
+            shiftDetail.employee.role === 'admin',
+        )
+        .map((shiftDetail: ShiftDetailType) => {
+          return {
+            start: new Date(shiftDetail.startDate),
+            end: new Date(
+              new Date(shiftDetail.endDate).setHours(
+                new Date(shiftDetail.endDate).getHours() - 8,
+              ),
             ),
-          ),
-          title: `${shiftDetail.employee.name} ${
-            shiftDetail.isAvailable ? '上班' : '休假'
-          }`,
-          isAvailable: shiftDetail.isAvailable,
-          employee: shiftDetail.employee._id,
-          _id: shiftDetail._id,
-          employeeName: shiftDetail.employee.name,
-        };
-      }),
+            title: `${shiftDetail.employee.name} ${
+              shiftDetail.isAvailable ? '上班' : '休假'
+            }`,
+            isAvailable: shiftDetail.isAvailable,
+            employee: shiftDetail.employee._id,
+            _id: shiftDetail._id,
+            employeeName: shiftDetail.employee.name,
+          };
+        }),
     );
   }, [data]);
 
@@ -214,6 +223,7 @@ const SchedulePage = () => {
   const employeeColors = useMemo(() => {
     const colors = new Map();
     if (eventsData) {
+      console.log(eventsData);
       eventsData.forEach((event) => {
         if (!colors.has(event.employee)) {
           colors.set(event.employee, generateUniqueDarkColor([...colors.values()]));
@@ -223,6 +233,28 @@ const SchedulePage = () => {
 
     return colors;
   }, [eventsData]);
+
+  const calendarRef = useRef<HTMLDivElement | null>(null);
+
+  // 生成PDF
+  const generatePDF = async () => {
+    if (!calendarRef.current) return;
+
+    // Set a higher scale for better quality in PDF
+    const canvas = await html2canvas(calendarRef.current, { scale: 2 });
+    const imgData = canvas.toDataURL('image/png');
+
+    // Adjust the PDF width and height based on the rendered canvas
+    const pdf = new jsPDF('portrait', 'mm', 'a4');
+    const pageWidth = pdf.internal.pageSize.getWidth();
+
+    // Dynamically calculate the image dimensions to fit the PDF page while maintaining aspect ratio
+    const imgWidth = pageWidth - 20; // Leave some margin
+    const imgHeight = (canvas.height * imgWidth) / canvas.width;
+
+    pdf.addImage(imgData, 'PNG', 10, 10, imgWidth, imgHeight);
+    pdf.save(`${company?.nickName}_${date.getMonth() + 1}月班表.pdf`);
+  };
 
   return (
     <div className='p-6'>
@@ -235,58 +267,72 @@ const SchedulePage = () => {
           <Loader className='h-6 w-6 animate-spin' />
         </div>
       ) : (
-        <Calendar
-          views={['day', 'month']}
-          localizer={localizer}
-          formats={{
-            dateFormat: 'MM/DD',
-            dayFormat: (date, culture) => localizer.format(date, 'MM月DD日 ddd', culture),
-            weekdayFormat: (date, culture) => localizer.format(date, 'ddd', culture),
-            monthHeaderFormat: (date, culture) =>
-              localizer.format(date, 'YYYY年 MM月', culture),
-            dayRangeHeaderFormat: ({ start, end }, culture) =>
-              `${localizer.format(start, 'MM月DD日', culture)} - ${localizer.format(
-                end,
-                'MM月DD日',
-                culture,
-              )}`,
-            dayHeaderFormat: (date, culture) =>
-              localizer.format(date, 'MM月DD日 dddd', culture),
-          }}
-          defaultDate={new Date()}
-          defaultView={view}
-          view={view}
-          date={date}
-          events={eventsData}
-          style={{ height: '80vh' }}
-          onNavigate={onNavigate}
-          onView={setView}
-          messages={customMessages}
-          showAllEvents
-          eventPropGetter={(event) => {
-            const style: React.CSSProperties = {};
+        <>
+          <div className='flex w-full justify-center py-2 md:justify-end'>
+            <button
+              className='rounded bg-blue-500 px-4 py-2 text-white hover:bg-blue-600'
+              onClick={generatePDF}
+            >
+              下載 PDF
+            </button>
+          </div>
 
-            if (!event.isAvailable) {
-              style.backgroundColor = '#CC0000';
-            } else {
-              // 從顏色map中找到對應員工id並設定顏色，預設為藍色
-              const employeeColor = employeeColors.get(event.employee) || '#0044BB';
-              style.backgroundColor = employeeColor;
-            }
+          <div ref={calendarRef}>
+            <Calendar
+              views={['day', 'month']}
+              localizer={localizer}
+              formats={{
+                dateFormat: 'MM/DD',
+                dayFormat: (date, culture) =>
+                  localizer.format(date, 'MM月DD日 ddd', culture),
+                weekdayFormat: (date, culture) => localizer.format(date, 'ddd', culture),
+                monthHeaderFormat: (date, culture) =>
+                  localizer.format(date, 'YYYY年 MM月', culture),
+                dayRangeHeaderFormat: ({ start, end }, culture) =>
+                  `${localizer.format(start, 'MM月DD日', culture)} - ${localizer.format(
+                    end,
+                    'MM月DD日',
+                    culture,
+                  )}`,
+                dayHeaderFormat: (date, culture) =>
+                  localizer.format(date, 'MM月DD日 dddd', culture),
+              }}
+              defaultDate={new Date()}
+              defaultView={view}
+              view={view}
+              date={date}
+              events={eventsData}
+              style={{ height: '80vh' }}
+              onNavigate={onNavigate}
+              onView={setView}
+              messages={customMessages}
+              showAllEvents
+              eventPropGetter={(event) => {
+                const style: React.CSSProperties = {};
 
-            // 判断是否是 day view和mobile
-            const isDayView = view === 'day';
+                if (!event.isAvailable) {
+                  style.backgroundColor = '#CC0000';
+                } else {
+                  // 從顏色map中找到對應員工id並設定顏色，預設為藍色
+                  const employeeColor = employeeColors.get(event.employee) || '#0044BB';
+                  style.backgroundColor = employeeColor;
+                }
 
-            if (isDayView && isMobile) {
-              return {
-                style,
-                className: 'day-event',
-              };
-            }
+                // 判断是否是 day view和mobile
+                const isDayView = view === 'day';
 
-            return { style };
-          }}
-        />
+                if (isDayView && isMobile) {
+                  return {
+                    style,
+                    className: 'day-event',
+                  };
+                }
+
+                return { style };
+              }}
+            />
+          </div>
+        </>
       )}
     </div>
   );

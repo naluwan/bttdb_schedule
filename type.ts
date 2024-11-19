@@ -74,3 +74,10 @@ export type CompanyType = {
   address: string;
   isLocked: boolean;
 };
+
+export type AttendanceRecordsType = {
+  _id: string;
+  time: Date;
+  employee: EmployeeType;
+  company: CompanyType;
+};
