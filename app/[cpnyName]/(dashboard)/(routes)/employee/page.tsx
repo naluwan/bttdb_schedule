@@ -221,176 +221,175 @@ const EmployeePage = () => {
             </SelectContent>
           </Select>
 
-          {user?.role === 'admin' ||
-            (user?.role === 'super-admin' && (
-              <Dialog open={open} onOpenChange={setOpen}>
-                <DialogTrigger asChild>
-                  <Button variant='outline' className='w-full sm:w-auto'>
-                    新增員工
-                  </Button>
-                </DialogTrigger>
-                <DialogContent className='hide-scrollbar max-h-[90%] max-w-[90%] overflow-y-scroll'>
-                  <DialogHeader>
-                    <DialogTitle>員工基本資料</DialogTitle>
-                    <DialogDescription>
-                      填入員工基本資料 (<span className='text-red-500'>*</span> 為必填)
-                    </DialogDescription>
-                  </DialogHeader>
-                  {isLoading ? (
-                    <div className='flex h-[474px] w-full items-center justify-center md:h-[232px]'>
-                      <LoaderCircle className='mr-3 h-5 w-5 animate-spin' />
-                      <p>員工建立中，請稍候...</p>
-                    </div>
-                  ) : (
-                    <div className='grid grid-cols-1 gap-4 md:grid-cols-2'>
-                      <div className='overflow-hidden rounded-lg border'>
-                        <div className='relative flex flex-col justify-between gap-y-2 p-4'>
-                          {/* 員工姓名 */}
-                          <div className='flex gap-4'>
-                            <div className='w-full'>
-                              <Label htmlFor='name'>
-                                員工姓名 <span className='text-red-500'>*</span>
-                              </Label>
-                              <Input
-                                name='name'
-                                id='name'
-                                required
-                                onChange={(e) => updateNewEmployee(e)}
-                                placeholder='請輸入員工姓名'
-                                defaultValue={newEmployee.name}
-                              />
-                            </div>
-
-                            <div className='w-full'>
-                              <Label htmlFor='name'>
-                                顯示名稱 <span className='text-red-500'>*</span>
-                              </Label>
-                              <Input
-                                name='nickname'
-                                id='nickname'
-                                required
-                                onChange={(e) => updateNewEmployee(e)}
-                                placeholder='請輸入員工暱稱或綽號'
-                                defaultValue={newEmployee.nickname}
-                              />
-                            </div>
-                          </div>
-
-                          {/* 身分證號碼 */}
-                          <div>
+          {(user?.role === 'admin' || user?.role === 'super-admin') && (
+            <Dialog open={open} onOpenChange={setOpen}>
+              <DialogTrigger asChild>
+                <Button variant='outline' className='w-full sm:w-auto'>
+                  新增員工
+                </Button>
+              </DialogTrigger>
+              <DialogContent className='hide-scrollbar max-h-[90%] max-w-[90%] overflow-y-scroll'>
+                <DialogHeader>
+                  <DialogTitle>員工基本資料</DialogTitle>
+                  <DialogDescription>
+                    填入員工基本資料 (<span className='text-red-500'>*</span> 為必填)
+                  </DialogDescription>
+                </DialogHeader>
+                {isLoading ? (
+                  <div className='flex h-[474px] w-full items-center justify-center md:h-[232px]'>
+                    <LoaderCircle className='mr-3 h-5 w-5 animate-spin' />
+                    <p>員工建立中，請稍候...</p>
+                  </div>
+                ) : (
+                  <div className='grid grid-cols-1 gap-4 md:grid-cols-2'>
+                    <div className='overflow-hidden rounded-lg border'>
+                      <div className='relative flex flex-col justify-between gap-y-2 p-4'>
+                        {/* 員工姓名 */}
+                        <div className='flex gap-4'>
+                          <div className='w-full'>
                             <Label htmlFor='name'>
-                              身分證號碼 <span className='text-red-500'>*</span>
+                              員工姓名 <span className='text-red-500'>*</span>
                             </Label>
                             <Input
-                              name='id'
-                              id='id'
+                              name='name'
+                              id='name'
                               required
                               onChange={(e) => updateNewEmployee(e)}
-                              defaultValue={newEmployee.id}
+                              placeholder='請輸入員工姓名'
+                              defaultValue={newEmployee.name}
                             />
                           </div>
 
-                          {/* Email */}
-                          <div>
-                            <Label htmlFor='email'>
-                              Email <span className='text-red-500'>*</span>
+                          <div className='w-full'>
+                            <Label htmlFor='name'>
+                              顯示名稱 <span className='text-red-500'>*</span>
                             </Label>
                             <Input
-                              name='email'
-                              id='email'
-                              type='email'
+                              name='nickname'
+                              id='nickname'
                               required
                               onChange={(e) => updateNewEmployee(e)}
-                              defaultValue={newEmployee.email}
+                              placeholder='請輸入員工暱稱或綽號'
+                              defaultValue={newEmployee.nickname}
                             />
                           </div>
                         </div>
-                      </div>
-                      <div className='flex flex-col gap-y-4 rounded-lg border p-4'>
-                        <div className='flex flex-col gap-y-3'>
-                          {/* 電話 */}
-                          <div>
-                            <Label htmlFor='phone'>
-                              電話 <span className='text-red-500'>*</span>
-                            </Label>
-                            <Input
-                              name='phone'
-                              id='phone'
-                              required
-                              onChange={(e) => updateNewEmployee(e)}
-                              defaultValue={newEmployee.phone}
-                            />
-                          </div>
 
-                          {/* 到職日期 */}
-                          <div>
-                            <Label htmlFor='dateEmployed'>
-                              到職日期 <span className='text-red-500'>*</span>
-                            </Label>
-                            <div className='flex gap-2'>
-                              <DatePicker
-                                openDatePicker={dateOpen}
-                                setOpenDatePicker={setDateOpen}
-                                defaultDate={newEmployee.dateEmployed}
-                                updateDate={updateDateEmployed}
-                                isEdit={true}
-                              />
-                            </div>
-                          </div>
+                        {/* 身分證號碼 */}
+                        <div>
+                          <Label htmlFor='name'>
+                            身分證號碼 <span className='text-red-500'>*</span>
+                          </Label>
+                          <Input
+                            name='id'
+                            id='id'
+                            required
+                            onChange={(e) => updateNewEmployee(e)}
+                            defaultValue={newEmployee.id}
+                          />
+                        </div>
 
-                          {/* 權限 */}
-                          <div>
-                            <Label htmlFor='role'>
-                              權限 <span className='text-red-500'>*</span>
-                            </Label>
-                            <RadioGroup
-                              className='flex'
-                              id='role'
-                              onValueChange={(e) => updateNewEmployee(e)}
-                              defaultValue={newEmployee.role}
-                            >
-                              <div className='flex items-center space-x-2'>
-                                <RadioGroupItem value='admin' id='option-one' />
-                                <Label htmlFor='option-one'>管理員</Label>
-                              </div>
-                              <div className='flex items-center space-x-2'>
-                                <RadioGroupItem value='full-time' id='option-two' />
-                                <Label htmlFor='option-two'>正職</Label>
-                              </div>
-                              <div className='flex items-center space-x-2'>
-                                <RadioGroupItem value='part-time' id='option-three' />
-                                <Label htmlFor='option-three'>兼職</Label>
-                              </div>
-                            </RadioGroup>
-                          </div>
+                        {/* Email */}
+                        <div>
+                          <Label htmlFor='email'>
+                            Email <span className='text-red-500'>*</span>
+                          </Label>
+                          <Input
+                            name='email'
+                            id='email'
+                            type='email'
+                            required
+                            onChange={(e) => updateNewEmployee(e)}
+                            defaultValue={newEmployee.email}
+                          />
                         </div>
                       </div>
                     </div>
-                  )}
+                    <div className='flex flex-col gap-y-4 rounded-lg border p-4'>
+                      <div className='flex flex-col gap-y-3'>
+                        {/* 電話 */}
+                        <div>
+                          <Label htmlFor='phone'>
+                            電話 <span className='text-red-500'>*</span>
+                          </Label>
+                          <Input
+                            name='phone'
+                            id='phone'
+                            required
+                            onChange={(e) => updateNewEmployee(e)}
+                            defaultValue={newEmployee.phone}
+                          />
+                        </div>
 
-                  <DialogFooter className='gap-4 p-0'>
-                    <Button type='submit' onClick={atSubmit}>
-                      新增
-                    </Button>
-                    <DialogClose
-                      onClick={() =>
-                        setNewEmployee({
-                          name: '',
-                          nickname: '',
-                          id: '',
-                          email: '',
-                          phone: '',
-                          dateEmployed: new Date(),
-                          role: '',
-                        })
-                      }
-                    >
-                      取消
-                    </DialogClose>
-                  </DialogFooter>
-                </DialogContent>
-              </Dialog>
-            ))}
+                        {/* 到職日期 */}
+                        <div>
+                          <Label htmlFor='dateEmployed'>
+                            到職日期 <span className='text-red-500'>*</span>
+                          </Label>
+                          <div className='flex gap-2'>
+                            <DatePicker
+                              openDatePicker={dateOpen}
+                              setOpenDatePicker={setDateOpen}
+                              defaultDate={newEmployee.dateEmployed}
+                              updateDate={updateDateEmployed}
+                              isEdit={true}
+                            />
+                          </div>
+                        </div>
+
+                        {/* 權限 */}
+                        <div>
+                          <Label htmlFor='role'>
+                            權限 <span className='text-red-500'>*</span>
+                          </Label>
+                          <RadioGroup
+                            className='flex'
+                            id='role'
+                            onValueChange={(e) => updateNewEmployee(e)}
+                            defaultValue={newEmployee.role}
+                          >
+                            <div className='flex items-center space-x-2'>
+                              <RadioGroupItem value='admin' id='option-one' />
+                              <Label htmlFor='option-one'>管理員</Label>
+                            </div>
+                            <div className='flex items-center space-x-2'>
+                              <RadioGroupItem value='full-time' id='option-two' />
+                              <Label htmlFor='option-two'>正職</Label>
+                            </div>
+                            <div className='flex items-center space-x-2'>
+                              <RadioGroupItem value='part-time' id='option-three' />
+                              <Label htmlFor='option-three'>兼職</Label>
+                            </div>
+                          </RadioGroup>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                <DialogFooter className='gap-4 p-0'>
+                  <Button type='submit' onClick={atSubmit}>
+                    新增
+                  </Button>
+                  <DialogClose
+                    onClick={() =>
+                      setNewEmployee({
+                        name: '',
+                        nickname: '',
+                        id: '',
+                        email: '',
+                        phone: '',
+                        dateEmployed: new Date(),
+                        role: '',
+                      })
+                    }
+                  >
+                    取消
+                  </DialogClose>
+                </DialogFooter>
+              </DialogContent>
+            </Dialog>
+          )}
         </div>
       </div>
 
