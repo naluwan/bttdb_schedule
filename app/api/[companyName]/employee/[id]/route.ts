@@ -94,6 +94,7 @@ export async function PATCH(
     const {
       _id,
       name,
+      nickname,
       birthday,
       address,
       phone,
@@ -108,6 +109,7 @@ export async function PATCH(
 
     if (
       !name ||
+      !nickname ||
       !birthday ||
       !address ||
       !phone ||
@@ -170,6 +172,7 @@ export async function PATCH(
       await emergencyContact.save();
 
       employee.name = name;
+      employee.nickname = nickname;
       employee.id = id;
       employee.birthday = birthday;
       employee.dateEmployed = dateEmployed;

@@ -35,6 +35,7 @@ import DatePicker from '@/components/datePicker/datePicker';
 
 interface NewEmployeeType {
   name: string;
+  nickname: string;
   id: string;
   email: string;
   phone: string;
@@ -67,6 +68,7 @@ const EmployeePage = () => {
   const [open, setOpen] = useState(false);
   const [newEmployee, setNewEmployee] = useState<NewEmployeeType>({
     name: '',
+    nickname: '',
     id: '',
     email: '',
     phone: '',
@@ -155,6 +157,7 @@ const EmployeePage = () => {
         // 初始化新增員工資訊
         setNewEmployee({
           name: '',
+          nickname: '',
           id: '',
           email: '',
           phone: '',
@@ -243,17 +246,34 @@ const EmployeePage = () => {
                       <div className='overflow-hidden rounded-lg border'>
                         <div className='relative flex flex-col justify-between gap-y-2 p-4'>
                           {/* 員工姓名 */}
-                          <div>
-                            <Label htmlFor='name'>
-                              員工姓名 <span className='text-red-500'>*</span>
-                            </Label>
-                            <Input
-                              name='name'
-                              id='name'
-                              required
-                              onChange={(e) => updateNewEmployee(e)}
-                              defaultValue={newEmployee.name}
-                            />
+                          <div className='flex gap-4'>
+                            <div className='w-full'>
+                              <Label htmlFor='name'>
+                                員工姓名 <span className='text-red-500'>*</span>
+                              </Label>
+                              <Input
+                                name='name'
+                                id='name'
+                                required
+                                onChange={(e) => updateNewEmployee(e)}
+                                placeholder='請輸入員工姓名'
+                                defaultValue={newEmployee.name}
+                              />
+                            </div>
+
+                            <div className='w-full'>
+                              <Label htmlFor='name'>
+                                顯示名稱 <span className='text-red-500'>*</span>
+                              </Label>
+                              <Input
+                                name='nickname'
+                                id='nickname'
+                                required
+                                onChange={(e) => updateNewEmployee(e)}
+                                placeholder='請輸入員工暱稱或綽號'
+                                defaultValue={newEmployee.nickname}
+                              />
+                            </div>
                           </div>
 
                           {/* 身分證號碼 */}
@@ -356,6 +376,7 @@ const EmployeePage = () => {
                       onClick={() =>
                         setNewEmployee({
                           name: '',
+                          nickname: '',
                           id: '',
                           email: '',
                           phone: '',

@@ -41,6 +41,7 @@ type EmployeeDetailType = {
   emergencyPhone: string;
   dateEmployed: Date;
   name: string;
+  nickname: string;
   email: string;
   phone: string;
   birthday: Date;
@@ -79,6 +80,7 @@ const EmployeeDetailPage = () => {
   const [updateEmployee, setUpdateEmployee] = useState<EmployeeDetailType>({
     _id: '',
     name: '',
+    nickname: '',
     id: '',
     emergencyId: '',
     emergencyName: '',
@@ -443,6 +445,29 @@ const EmployeeDetailPage = () => {
                       required
                       onChange={(e) => updateEmployeeDetail(e)}
                       value={updateEmployee?.name}
+                      className={cn('hidden', isEdit && 'block text-xl md:text-2xl')}
+                    />
+                  </span>
+                </div>
+                <div>
+                  <Label
+                    className='whitespace-nowrap text-xl font-bold text-gray-700 md:text-2xl'
+                    htmlFor='name'
+                  >
+                    顯示名稱:
+                  </Label>
+                  <span
+                    className={cn('ml-2 break-words text-gray-900', isEdit && 'hidden')}
+                  >
+                    {employeeData?.nickname}
+                  </span>
+                  <span className={cn('hidden', isEdit && 'block text-xl md:text-2xl')}>
+                    <Input
+                      name='nickname'
+                      id='nickname'
+                      required
+                      onChange={(e) => updateEmployeeDetail(e)}
+                      value={updateEmployee?.nickname}
                       className={cn('hidden', isEdit && 'block text-xl md:text-2xl')}
                     />
                   </span>

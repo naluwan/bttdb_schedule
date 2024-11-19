@@ -207,9 +207,11 @@ const SchedulePage = () => {
                 new Date(shiftDetail.endDate).getHours() - 8,
               ),
             ),
-            title: `${shiftDetail.employee.name} ${
-              shiftDetail.isAvailable ? '上班' : '休假'
-            }`,
+            title: `${
+              shiftDetail.employee.nickname
+                ? shiftDetail.employee.nickname
+                : shiftDetail.employee.name
+            } ${shiftDetail.isAvailable ? '上班' : '休假'}`,
             isAvailable: shiftDetail.isAvailable,
             employee: shiftDetail.employee._id,
             _id: shiftDetail._id,

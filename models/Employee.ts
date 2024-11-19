@@ -3,6 +3,7 @@ import mongoose, { Document } from 'mongoose';
 export interface EmployeeType extends Document {
   _id: string;
   name: string;
+  nickname: string;
   id: string;
   email: string;
   password: string;
@@ -25,6 +26,7 @@ export interface EmployeeType extends Document {
 
 const EmployeeSchema = new mongoose.Schema({
   name: { type: String, required: true },
+  nickname: { type: String, required: true, default: '' },
   id: { type: String, required: true, unique: true },
   email: { type: String, required: true, unique: true },
   password: { type: String, required: true },

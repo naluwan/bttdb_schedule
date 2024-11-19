@@ -48,9 +48,9 @@ export async function POST(
     }
 
     // 獲取並處理請求
-    const { name, email, phone, role, dateEmployed, id } = await req.json();
+    const { name, email, phone, role, dateEmployed, id, nickname } = await req.json();
 
-    if (!name || !email || !phone || !role || !dateEmployed || !id) {
+    if (!name || !email || !phone || !role || !dateEmployed || !id || !nickname) {
       return NextResponse.json({ status: 400, message: '所有欄位都是必填的' });
     }
 
@@ -67,6 +67,7 @@ export async function POST(
     // 建立新員工
     const newEmployee = new Employee({
       name,
+      nickname,
       email,
       password: hashedPassword,
       phone,
