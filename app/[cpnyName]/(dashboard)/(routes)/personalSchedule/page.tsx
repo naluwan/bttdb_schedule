@@ -71,6 +71,7 @@ const PersonalSchedulePage = () => {
   const [date, setDate] = useState(new Date());
   const [open, setOpen] = useState(false);
   const [openEdit, setOpenEdit] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
   // 進度條狀態
   const [uploadProgress, setUploadProgress] = useState(0);
   const [autoScheduleLoading, setAutoScheduleLoading] = useState(false);
@@ -144,6 +145,24 @@ const PersonalSchedulePage = () => {
       });
     }
   }, [user]);
+
+  // 設置監聽器來查看是否為mobile
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth <= 768); // 如果螢幕小于等于768px，就是mobile
+    };
+
+    // 初始化
+    checkMobile();
+
+    // 設置事件監聽器，在窗口大小改變時重新檢測
+    window.addEventListener('resize', checkMobile);
+
+    // 在離開component時移除事件監聽器
+    return () => {
+      window.removeEventListener('resize', checkMobile);
+    };
+  }, []);
 
   //呼叫api獲取進度條
   const checkProgress = useCallback(async () => {
@@ -815,10 +834,28 @@ const PersonalSchedulePage = () => {
               showAllEvents
               showMultiDayTimes
               eventPropGetter={(event) => {
-                const backgroundColor = event.title.includes('休假')
-                  ? '#CC0000'
-                  : '#0044BB';
-                return { style: { backgroundColor } };
+                const style: React.CSSProperties = {};
+
+                if (!event.isAvailable) {
+                  style.backgroundColor = '#CC0000';
+                }
+                //  else {
+                //   // 從顏色map中找到對應員工id並設定顏色，預設為藍色
+                //   const employeeColor = employeeColors.get(event.employee) || '#0044BB';
+                //   style.backgroundColor = employeeColor;
+                // }
+
+                // 判断是否是 day view和mobile
+                const isDayView = view === 'day';
+
+                if (isDayView && isMobile) {
+                  return {
+                    style,
+                    className: 'day-event',
+                  };
+                }
+
+                return { style };
               }}
             />
           )}

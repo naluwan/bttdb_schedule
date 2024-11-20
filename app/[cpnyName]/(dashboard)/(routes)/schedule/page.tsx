@@ -9,43 +9,43 @@ import useSWR from 'swr';
 import 'moment/locale/zh-tw';
 import 'react-big-calendar/lib/css/react-big-calendar.css';
 import { Loader } from 'lucide-react';
-import randomColor from 'randomcolor';
+// import randomColor from 'randomcolor';
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
 
 moment.locale('zh-tw');
 
-type ColorType = string;
+// type ColorType = string;
 
 // 生成较暗颜色，确保颜色差异较大
-const generateUniqueDarkColor = (existingColors: ColorType[]): ColorType => {
-  let color: string | null = null;
-  let maxAttempts = 10; // 限制生成尝试次数，避免无限循环
+// const generateUniqueDarkColor = (existingColors: ColorType[]): ColorType => {
+//   let color: string | null = null;
+//   let maxAttempts = 10; // 限制生成尝试次数，避免无限循环
 
-  do {
-    color = randomColor({
-      luminosity: 'dark', // 使用暗色
-      format: 'hsl', // 使用 HSL 模型，方便控制色相和饱和度
-    });
+//   do {
+//     color = randomColor({
+//       luminosity: 'dark', // 使用暗色
+//       format: 'hsl', // 使用 HSL 模型，方便控制色相和饱和度
+//     });
 
-    const hue = parseInt(color.match(/\d+/g)?.[0] || '0', 10); // 提取颜色的 hue 值
-    const saturation = parseInt(color.match(/\d+/g)?.[1] || '0', 10); // 提取颜色的饱和度
+//     const hue = parseInt(color.match(/\d+/g)?.[0] || '0', 10); // 提取颜色的 hue 值
+//     const saturation = parseInt(color.match(/\d+/g)?.[1] || '0', 10); // 提取颜色的饱和度
 
-    // 确保生成的颜色与已存在的颜色在色相(hue)和饱和度(saturation)上有足够差异
-    const isTooSimilar = existingColors.some((existingColor) => {
-      const existingHue = parseInt(existingColor.match(/\d+/g)?.[0] || '0', 10);
-      const existingSaturation = parseInt(existingColor.match(/\d+/g)?.[1] || '0', 10);
-      return (
-        Math.abs(hue - existingHue) < 30 && Math.abs(saturation - existingSaturation) < 15
-      );
-    });
+//     // 确保生成的颜色与已存在的颜色在色相(hue)和饱和度(saturation)上有足够差异
+//     const isTooSimilar = existingColors.some((existingColor) => {
+//       const existingHue = parseInt(existingColor.match(/\d+/g)?.[0] || '0', 10);
+//       const existingSaturation = parseInt(existingColor.match(/\d+/g)?.[1] || '0', 10);
+//       return (
+//         Math.abs(hue - existingHue) < 30 && Math.abs(saturation - existingSaturation) < 15
+//       );
+//     });
 
-    if (!isTooSimilar) break;
-    maxAttempts--;
-  } while (maxAttempts > 0);
+//     if (!isTooSimilar) break;
+//     maxAttempts--;
+//   } while (maxAttempts > 0);
 
-  return color ?? '#000000'; // 如果生成失败，返回默认黑色
-};
+//   return color ?? '#000000'; // 如果生成失败，返回默认黑色
+// };
 
 const SchedulePage = () => {
   const localizer = useMemo(() => momentLocalizer(moment), []);
@@ -222,19 +222,19 @@ const SchedulePage = () => {
   }, [data]);
 
   // 員工顏色map
-  const employeeColors = useMemo(() => {
-    const colors = new Map();
-    if (eventsData) {
-      console.log(eventsData);
-      eventsData.forEach((event) => {
-        if (!colors.has(event.employee)) {
-          colors.set(event.employee, generateUniqueDarkColor([...colors.values()]));
-        }
-      });
-    }
+  // const employeeColors = useMemo(() => {
+  //   const colors = new Map();
+  //   if (eventsData) {
+  //     console.log(eventsData);
+  //     eventsData.forEach((event) => {
+  //       if (!colors.has(event.employee)) {
+  //         colors.set(event.employee, generateUniqueDarkColor([...colors.values()]));
+  //       }
+  //     });
+  //   }
 
-    return colors;
-  }, [eventsData]);
+  //   return colors;
+  // }, [eventsData]);
 
   const calendarRef = useRef<HTMLDivElement | null>(null);
 
@@ -314,11 +314,12 @@ const SchedulePage = () => {
 
                 if (!event.isAvailable) {
                   style.backgroundColor = '#CC0000';
-                } else {
-                  // 從顏色map中找到對應員工id並設定顏色，預設為藍色
-                  const employeeColor = employeeColors.get(event.employee) || '#0044BB';
-                  style.backgroundColor = employeeColor;
                 }
+                //  else {
+                //   // 從顏色map中找到對應員工id並設定顏色，預設為藍色
+                //   const employeeColor = employeeColors.get(event.employee) || '#0044BB';
+                //   style.backgroundColor = employeeColor;
+                // }
 
                 // 判断是否是 day view和mobile
                 const isDayView = view === 'day';
