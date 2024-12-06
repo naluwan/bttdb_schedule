@@ -67,12 +67,6 @@ const EmployeeDetailPage = () => {
   const token = Cookies.get('BTTDB_JWT_TOKEN');
   const router = useRouter();
 
-  useEffect(() => {
-    if (!token) {
-      router.push(`/${cpnyName}/sign-in`);
-    }
-  }, [router, token, cpnyName]);
-
   const [isEdit, setIsEdit] = useState(false);
   const [openDateEmployed, setOpenDateEmployed] = useState(false);
   const [openBirthday, setOpenBirthday] = useState(false);
@@ -118,10 +112,6 @@ const EmployeeDetailPage = () => {
 
   // 定義一個 function 來調用 API 取得員工考勤資料
   const getEmployeeAttendance = async () => {
-    if (!token) {
-      return router.push(`/${cpnyName}/sign-in`); // 如果 token 不存在，回到登入頁面
-    }
-
     const response = await fetch(`/api/${cpnyName}/attendance/${id}`, {
       headers: {
         Authorization: `Bearer ${token}`,
@@ -156,10 +146,6 @@ const EmployeeDetailPage = () => {
 
   // 定義一個 function 來調用 API 取得員工資料
   const getEmployeeData = async () => {
-    if (!token) {
-      return router.push(`/${cpnyName}/sign-in`); // 如果 token 不存在，回到登入頁面
-    }
-
     const response = await fetch(`/api/${cpnyName}/employee/${id}`, {
       headers: {
         Authorization: `Bearer ${token}`,

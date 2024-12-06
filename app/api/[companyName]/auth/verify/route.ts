@@ -5,7 +5,7 @@ import connect from '@/lib/mongodb';
 connect();
 
 export async function POST(req: AuthenticatedRequest) {
-  // 验证 JWT
+  // 驗證 JWT
   const tokenVerification = await verifyToken(req);
   if (tokenVerification) {
     return tokenVerification; // 驗證失敗返回錯誤

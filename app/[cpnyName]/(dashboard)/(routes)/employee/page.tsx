@@ -79,18 +79,8 @@ const EmployeePage = () => {
   // 獲取token
   const token = Cookies.get('BTTDB_JWT_TOKEN');
 
-  useEffect(() => {
-    if (!token) {
-      router.push(`/${cpnyName}/sign-in`);
-    }
-  }, [router, token, cpnyName]);
-
   // 定義一個 function 來調用 API
   const getAllEmployeeData = async () => {
-    if (!token) {
-      return router.push(`/${cpnyName}/sign-in`); // 如果 token 不存在，回到登入頁面
-    }
-
     const response = await fetch(`/api/${cpnyName}/employee`, {
       headers: {
         Authorization: `Bearer ${token}`,

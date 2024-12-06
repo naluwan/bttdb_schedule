@@ -78,13 +78,6 @@ const SchedulePage = () => {
   const token = Cookies.get('BTTDB_JWT_TOKEN');
   const router = useRouter();
 
-  // 檢查token
-  useEffect(() => {
-    if (!token) {
-      router.push(`/${cpnyName}/sign-in`);
-    }
-  }, [router, token, cpnyName]);
-
   // 設置監聽器來查看是否為mobile
   useEffect(() => {
     const checkMobile = () => {
@@ -124,10 +117,6 @@ const SchedulePage = () => {
 
   // 定義一個 function 來調用 API 獲取排班資料
   const getEmployeeShift = async () => {
-    if (!token) {
-      return router.push(`/${cpnyName}/sign-in`); // 如果 token 不存在，回到登入頁面
-    }
-
     const response = await fetch(`/api/${cpnyName}/shift/allShifts`, {
       headers: {
         Authorization: `Bearer ${token}`,
@@ -154,10 +143,6 @@ const SchedulePage = () => {
 
   // 定義一個 function 來調用 API 獲取公司資料
   const getCompanyData = async () => {
-    if (!token) {
-      return router.push(`/${cpnyName}/sign-in`); // 如果 token 不存在，回到登入頁面
-    }
-
     const response = await fetch(`/api/${cpnyName}/company`, {
       headers: {
         Authorization: `Bearer ${token}`,

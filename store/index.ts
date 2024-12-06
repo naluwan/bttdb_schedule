@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 import { State, UserType } from '@/type';
 import { cleanToken } from '@/service/api';
+import toast from 'react-hot-toast';
 
 const initialState = {
   isAppInitializedComplete: false,
@@ -45,6 +46,7 @@ const useStore = create<State>((set) => {
     onLogout() {
       set({ user: null });
       cleanToken();
+      toast.success('登出成功');
     },
   };
 });

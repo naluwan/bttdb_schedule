@@ -4,6 +4,7 @@ import React, { useEffect } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
 import bcrypt from 'bcryptjs';
 import Cookies from 'js-cookie';
+
 const ProtectedProvider = ({ children }: { children: React.ReactNode }) => {
   const router = useRouter();
   const pathName = usePathname();
@@ -70,7 +71,6 @@ const ProtectedProvider = ({ children }: { children: React.ReactNode }) => {
     }
 
     if (!user) {
-      // router.push(pathName);
       router.push(`/${cpnyName}/sign-in`);
       return;
     }

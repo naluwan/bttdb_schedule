@@ -1,5 +1,4 @@
 'use client';
-import useAuth from '@/hooks/useAuth';
 import Navbar from './_components/navbar';
 import Sidebar from './_components/sidebar';
 import { useParams, useRouter } from 'next/navigation';
@@ -9,9 +8,8 @@ import useStore from '@/store';
 import useSWR from 'swr';
 
 const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
-  useAuth();
   const { cpnyName } = useParams();
-  const { setIsOpenSchedule, user } = useStore((state) => {
+  const { setIsOpenSchedule } = useStore((state) => {
     return {
       setIsOpenSchedule: state.setIsOpenSchedule,
       user: state.user,
@@ -29,11 +27,6 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
 
   // 定義一個 function 來調用 API
   const getSettingData = async () => {
-    if (!token && !user) {
-      router.push(`/${cpnyName}/sign-in`); // 如果 token 不存在，回到登入頁面
-      return;
-    }
-
     const response = await fetch(`/api/${cpnyName}/setting`, {
       headers: {
         Authorization: `Bearer ${token}`,

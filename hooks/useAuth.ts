@@ -17,10 +17,9 @@ const useAuth = () => {
     isInitialized: state.isInitialized,
     setCpnyName: state.setCpnyName,
   }));
+  const token = Cookies.get('BTTDB_JWT_TOKEN');
 
   useEffect(() => {
-    const token = Cookies.get('BTTDB_JWT_TOKEN');
-
     // 嘗試從 Cookies 獲取 cpnyName
     const storedCpnyName = Cookies.get('EZY_SCHEDULE_CPNY_NAME');
     if (storedCpnyName) {
@@ -30,7 +29,7 @@ const useAuth = () => {
     if (token) {
       // 每次呼叫時驗證token
       axios
-        .post(`/api/${cpnyName}/auth/verify`, null, {
+        .post(`/api/${cpnyName || storedCpnyName}/auth/verify`, null, {
           headers: {
             Authorization: `Bearer ${token}`,
           },
@@ -39,6 +38,15 @@ const useAuth = () => {
           if (res.data.status === 200) {
             setUser(res.data.user);
             router.push(pathName);
+            // if (
+            //   pathName === `/${cpnyName || storedCpnyName}/sign-in` ||
+            //   pathName === `/${cpnyName || storedCpnyName}/sign-up`
+            // ) {
+            //   console.log('push schedule', `/${cpnyName || storedCpnyName}/schedule`);
+            //   router.push(`/${cpnyName || storedCpnyName}/schedule`);
+            // } else {
+            //   router.push(pathName);
+            // }
           } else {
             Cookies.remove('BTTDB_JWT_TOKEN');
             toast.error(res.data.message);
