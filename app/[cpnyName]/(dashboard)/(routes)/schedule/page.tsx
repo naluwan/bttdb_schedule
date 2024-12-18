@@ -3,15 +3,14 @@ import { CompanyType, EventType, ShiftDetailType } from '@/type';
 import Cookies from 'js-cookie';
 import moment from 'moment';
 import { useParams, useRouter } from 'next/navigation';
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { Calendar, momentLocalizer, View } from 'react-big-calendar';
 import useSWR from 'swr';
 import 'moment/locale/zh-tw';
 import 'react-big-calendar/lib/css/react-big-calendar.css';
 import { Loader } from 'lucide-react';
+import { usePDF } from 'react-to-pdf';
 // import randomColor from 'randomcolor';
-import jsPDF from 'jspdf';
-import html2canvas from 'html2canvas';
 
 moment.locale('zh-tw');
 
@@ -54,6 +53,15 @@ const SchedulePage = () => {
   const [date, setDate] = useState(new Date());
   const [company, setCompany] = useState<CompanyType | null>(null);
   const [isMobile, setIsMobile] = useState(false);
+
+  const { toPDF, targetRef } = usePDF({
+    filename: `${company?.nickName}-${date.getFullYear()}-${
+      date.getMonth() + 1
+    }月班表.pdf`,
+    page: {
+      orientation: 'landscape',
+    },
+  });
 
   // 導航按鈕文字state
   const [customMessages, setCustomMessages] = useState({
@@ -221,28 +229,6 @@ const SchedulePage = () => {
   //   return colors;
   // }, [eventsData]);
 
-  const calendarRef = useRef<HTMLDivElement | null>(null);
-
-  // 生成PDF
-  const generatePDF = async () => {
-    if (!calendarRef.current) return;
-
-    // Set a higher scale for better quality in PDF
-    const canvas = await html2canvas(calendarRef.current, { scale: 2 });
-    const imgData = canvas.toDataURL('image/png');
-
-    // Adjust the PDF width and height based on the rendered canvas
-    const pdf = new jsPDF('portrait', 'mm', 'a4');
-    const pageWidth = pdf.internal.pageSize.getWidth();
-
-    // Dynamically calculate the image dimensions to fit the PDF page while maintaining aspect ratio
-    const imgWidth = pageWidth - 20; // Leave some margin
-    const imgHeight = (canvas.height * imgWidth) / canvas.width;
-
-    pdf.addImage(imgData, 'PNG', 10, 10, imgWidth, imgHeight);
-    pdf.save(`${company?.nickName}_${date.getMonth() + 1}月班表.pdf`);
-  };
-
   return (
     <div className='p-6'>
       {!companyLoading && (
@@ -258,13 +244,13 @@ const SchedulePage = () => {
           <div className='flex w-full justify-center py-2 md:justify-end'>
             <button
               className='rounded bg-blue-500 px-4 py-2 text-white hover:bg-blue-600'
-              onClick={generatePDF}
+              onClick={() => toPDF()}
             >
               下載 PDF
             </button>
           </div>
 
-          <div ref={calendarRef}>
+          <div ref={targetRef}>
             <Calendar
               views={['day', 'month']}
               localizer={localizer}
@@ -289,7 +275,7 @@ const SchedulePage = () => {
               view={view}
               date={date}
               events={eventsData}
-              style={{ height: '80vh' }}
+              style={{ height: 'auto', minHeight: '80vh' }}
               onNavigate={onNavigate}
               onView={setView}
               messages={customMessages}

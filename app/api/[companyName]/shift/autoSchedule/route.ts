@@ -69,18 +69,35 @@ export async function POST(
     }
     const shifts = await Shift.find({ company: company._id, month });
 
-    const isAutoScheduleExist = shifts.some(
-      (shift) => shift.scheduleType === 'automatic',
+    // 獲取當前月份與年份
+    const nowDate = new Date();
+    const currentMonth = nowDate.getMonth() + 1; // 當前月份 (1-12)
+    const currentYear = nowDate.getFullYear();
+
+    // 目標月份與年份
+    const targetMonth = month;
+    let targetYear = currentYear;
+
+    // 如果目標月份小於當前月份，則目標年份加1
+    if (targetMonth < currentMonth) {
+      targetYear += 1;
+    }
+
+    // 檢查該月份是否已經有自動排班紀錄
+    const isAutoScheduleExist = shifts.filter(
+      (shift) =>
+        shift.scheduleType === 'automatic' &&
+        shift.startDate.getFullYear() === targetYear,
     );
 
-    if (isAutoScheduleExist) {
+    if (isAutoScheduleExist.length > 0) {
       return NextResponse.json({ status: 400, message: '該月份已經有自動排班紀錄' });
     }
-    // 設置月份範圍
-    // 取得當前年份
-    const currentYear = new Date().getFullYear();
+
     // 設定該月份的起始日和最後一天
-    const startDate = parseISO(`${currentYear}-${month}-01`);
+    const startDate = parseISO(
+      `${targetYear}-${String(targetMonth).padStart(2, '0')}-01`,
+    );
     const endDate = endOfMonth(startDate);
     const daysInMonth = eachDayOfInterval({ start: startDate, end: endDate });
 

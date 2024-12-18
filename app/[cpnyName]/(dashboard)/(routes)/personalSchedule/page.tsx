@@ -91,7 +91,7 @@ const PersonalSchedulePage = () => {
   const [filterData, setFilterData] = useState('all');
   const [editShift, setEditShift] = useState<EditShiftType | null>(null);
   const [filteredEmployee, setFilteredEmployee] = useState<
-    { name: string; employeeId: string }[]
+    { name: string; employeeId: string; isLock: boolean }[]
   >([]);
   // 導航按鈕文字state
   const [customMessages, setCustomMessages] = useState({
@@ -410,7 +410,9 @@ const PersonalSchedulePage = () => {
   useEffect(() => {
     if (eventsData && eventsData.length > 0) {
       const nowMonthShifts = eventsData.filter(
-        (shift) => new Date(shift.start).getMonth() + 1 === date.getMonth() + 1,
+        (shift) =>
+          new Date(shift.start).getMonth() + 1 === date.getMonth() + 1 &&
+          new Date(shift.start).getFullYear() === date.getFullYear(),
       );
       if (nowMonthShifts.length > 0) {
         setIsComplete(nowMonthShifts.every((shift) => shift.isComplete));
@@ -565,9 +567,17 @@ const PersonalSchedulePage = () => {
   useEffect(() => {
     if (employeeData) {
       employeeData.data?.forEach((employee: EmployeeType) => {
-        if (employee.role !== 'shareholder' && employee.role !== 'super-admin') {
+        if (
+          employee.role !== 'shareholder' &&
+          employee.role !== 'super-admin' &&
+          !employee.isLock
+        ) {
           setFilteredEmployee((prev) =>
-            prev.concat({ name: employee.name, employeeId: employee._id }),
+            prev.concat({
+              name: employee.name,
+              employeeId: employee._id,
+              isLock: employee.isLock,
+            }),
           );
         }
       });
@@ -582,9 +592,11 @@ const PersonalSchedulePage = () => {
     async (e: React.MouseEvent) => {
       e.preventDefault();
       setAutoScheduleLoading(true);
-      const nowMonth = date.getMonth() + 1;
 
-      const data = { filteredEmployee, month: nowMonth };
+      // 目標月份
+      const targetMonth = date.getMonth() + 1; // 用戶選擇的月份 (1-12)
+
+      const data = { filteredEmployee, month: targetMonth };
 
       const res = await axios.post(`/api/${cpnyName}/shift/autoSchedule`, data, {
         headers: {
@@ -707,11 +719,17 @@ const PersonalSchedulePage = () => {
                   <SelectContent className='w-full'>
                     <SelectItem value='all'>全部員工</SelectItem>
                     {filteredEmployee.length > 0 &&
-                      filteredEmployee.map((employee) => (
-                        <SelectItem key={employee.employeeId} value={employee.employeeId}>
-                          {employee.name}
-                        </SelectItem>
-                      ))}
+                      filteredEmployee.map(
+                        (employee) =>
+                          !employee.isLock && (
+                            <SelectItem
+                              key={employee.employeeId}
+                              value={employee.employeeId}
+                            >
+                              {employee.name}
+                            </SelectItem>
+                          ),
+                      )}
                   </SelectContent>
                 </Select>
               </div>
@@ -720,14 +738,14 @@ const PersonalSchedulePage = () => {
                   <Button
                     variant='default'
                     onClick={(e) => atAutoSchedule(e)}
-                    disabled={autoScheduleLoading}
+                    disabled={autoScheduleLoading || isComplete}
                   >
                     自動排班
                   </Button>
                   <Button
                     variant='destructive'
                     onClick={(e) => atRemoveAutoSchedule(e)}
-                    disabled={deleteAutoScheduleLoading}
+                    disabled={deleteAutoScheduleLoading || isComplete}
                   >
                     移除自動排班
                   </Button>
