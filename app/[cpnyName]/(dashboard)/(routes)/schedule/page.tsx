@@ -275,11 +275,12 @@ const SchedulePage = () => {
               view={view}
               date={date}
               events={eventsData}
-              style={{ height: 'auto', minHeight: '80vh' }}
+              style={{ height: '80vh' }}
               onNavigate={onNavigate}
               onView={setView}
               messages={customMessages}
               showAllEvents
+              showMultiDayTimes
               eventPropGetter={(event) => {
                 const style: React.CSSProperties = {};
 
