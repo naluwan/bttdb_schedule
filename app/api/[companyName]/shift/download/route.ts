@@ -18,7 +18,6 @@ const truncateString = (str: string, maxLen = 255) =>
 export async function POST(req: Request): Promise<NextResponse> {
   try {
     const { month, companyName } = await req.json();
-    console.log('Received request:', { month, companyName });
 
     const company = await Company.findOne({ enName: companyName });
     if (!company) {
@@ -114,8 +113,6 @@ export async function POST(req: Request): Promise<NextResponse> {
     // 設定標題行的字型樣式與對齊方式
     worksheet.getRow(1).font = { bold: true, size: 16 };
     worksheet.getRow(1).alignment = { horizontal: 'center' };
-
-    console.log('Excel workbook successfully generated');
 
     // 生成 Excel 檔案 Buffer
     const buffer = await workbook.xlsx.writeBuffer();
