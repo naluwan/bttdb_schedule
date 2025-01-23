@@ -570,6 +570,7 @@ const PersonalSchedulePage = () => {
         if (
           employee.role !== 'shareholder' &&
           employee.role !== 'super-admin' &&
+          employee.role !== 'part-time' &&
           !employee.isLock
         ) {
           setFilteredEmployee((prev) =>
