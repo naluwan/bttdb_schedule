@@ -9,7 +9,8 @@ import useSWR from 'swr';
 import 'moment/locale/zh-tw';
 import 'react-big-calendar/lib/css/react-big-calendar.css';
 import { Loader } from 'lucide-react';
-import { usePDF } from 'react-to-pdf';
+// import { usePDF } from 'react-to-pdf';
+import DownloadExcelButton from '@/components/downloadBtn';
 // import randomColor from 'randomcolor';
 
 moment.locale('zh-tw');
@@ -54,14 +55,14 @@ const SchedulePage = () => {
   const [company, setCompany] = useState<CompanyType | null>(null);
   const [isMobile, setIsMobile] = useState(false);
 
-  const { toPDF, targetRef } = usePDF({
-    filename: `${company?.nickName}-${date.getFullYear()}-${
-      date.getMonth() + 1
-    }月班表.pdf`,
-    page: {
-      orientation: 'landscape',
-    },
-  });
+  // const { toPDF, targetRef } = usePDF({
+  //   filename: `${company?.nickName}-${date.getFullYear()}-${
+  //     date.getMonth() + 1
+  //   }月班表.pdf`,
+  //   page: {
+  //     orientation: 'landscape',
+  //   },
+  // });
 
   // 導航按鈕文字state
   const [customMessages, setCustomMessages] = useState({
@@ -242,15 +243,19 @@ const SchedulePage = () => {
       ) : (
         <>
           <div className='flex w-full justify-center py-2 md:justify-end'>
-            <button
+            {/* <button
               className='rounded bg-blue-500 px-4 py-2 text-white hover:bg-blue-600'
               onClick={() => toPDF()}
             >
               下載 PDF
-            </button>
+            </button> */}
+            <DownloadExcelButton
+              month={date.getMonth() + 1}
+              companyName={company?.enName as string}
+            />
           </div>
 
-          <div ref={targetRef}>
+          <div>
             <Calendar
               views={['day', 'month']}
               localizer={localizer}
